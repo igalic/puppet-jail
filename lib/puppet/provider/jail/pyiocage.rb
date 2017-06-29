@@ -160,19 +160,23 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
     @property_flush[:release] = value
   end
 
+  def emptyish(x)
+    x.nil? || x.empty? || x == :absent
+  end
+
   def wrap_create(jensure = resource[:ensure])
     frel = Facter.value(:os)['release']['full'].gsub(%r{-p\d+$}, '')
 
-    template = resource[:template] ? "--template=#{resource[:template]}" : nil
-    release = resource[:release] ? "--release=#{resource[:release]}" : "--release=#{frel}"
+    template = !emptyish(resource[:template]) ? "--template=#{resource[:template]}" : nil
+    release = !emptyish(resource[:release]) ? "--release=#{resource[:release]}" : "--release=#{frel}"
     from = template.nil? ? release : template
 
     create_template = jensure == :template ? 'template=yes' : nil
 
-    unless resource[:pkglist].empty?
+    unless emptyish(resource[:pkglist])
       network = []
-      network << !resource[:ip4_addr].empty? ? "ip4_addr=#{resource[:ip4_addr]}" : nil
-      network << !resource[:ip6_addr].empty? ? "ip6_addr=#{resource[:ip6_addr]}" : nil
+      network << !emptyish(resource[:ip4_addr]) ? "ip4_addr=#{resource[:ip4_addr]}" : nil
+      network << !emptyish(resource[:ip6_addr]) ? "ip6_addr=#{resource[:ip6_addr]}" : nil
       raise Puppet::Error, 'pre-installation of packages requires an IP address' if network.compact.empty?
 
       pkgfile = Tempfile.new('puppet-iocage-pkglist.json')
