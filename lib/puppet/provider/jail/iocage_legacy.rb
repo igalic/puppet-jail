@@ -145,6 +145,36 @@ Puppet::Type.type(:jail).provide(:iocage_legacy) do
     @property_flush[:jail_zfs_dataset] = value
   end
 
+  def wrap_create(jensure = resource[:ensure])
+    frel = Facter.value(:os)['release']['full'].gsub(%r{-p\d+$}, '')
+
+    release = resource[:release] ? "--release=#{resource[:release]}" : "--release=#{frel}"
+
+    unless resource[:pkglist].empty?
+      network = []
+      network << !resource[:ip4_addr].empty? ? "ip4_addr=#{resource[:ip4_addr]}" : nil
+      network << !resource[:ip6_addr].empty? ? "ip6_addr=#{resource[:ip6_addr]}" : nil
+      raise Puppet::Error, 'pre-installation of packages requires an IP address' if network.compact.empty?
+
+      pkgfile = Tempfile.new('puppet-iocage_legacy-pkg.list')
+      pkgfile.write(resource[:pkglist].join("\n"))
+      pkgfile.close
+      pkglist = "--pkglist=#{pkgfile.path}"
+    end
+    iocage(['create', '-c', release, pkglist, "tag=#{resource[:name]}"].compact)
+    set_property('template', 'yes') if jensure == :template
+  end
+
+  def wrap_destroy
+    iocage(['stop', resource[:name]])
+    iocage(['destroy', '--force', resource[:name]])
+  end
+
+  def update
+    wrap_destroy
+    wrap_create
+  end
+
   def flush
     if @property_flush
       Puppet.debug "JailIocage(#flush): #{@property_flush}"
@@ -158,22 +188,13 @@ Puppet::Type.type(:jail).provide(:iocage_legacy) do
         :jail_zfs_dataset
       ]
 
-      unless resource[:pkglist].empty?
-        pkgfile = Tempfile.new('puppet-iocage-pkg.list')
-        pkgfile.write(resource[:pkglist].join("\n"))
-        pkgfile.close
-        pkglist = "--pkglist=#{pkgfile.path}"
-      end
-
       case resource[:ensure]
       when :absent
-        iocage(['stop', resource[:name]])
-        iocage(['destroy', '-f', resource[:name]])
+        wrap_destroy
       when :present
-        iocage(['create', '-c', pkglist, "tag=#{resource[:name]}"].compact)
+        wrap_create(:present)
       when :template
-        iocage(['create', '-c', pkglist, "tag=#{resource[:name]}"].compact)
-        set_property('template', 'yes')
+        wrap_create(:template)
       end
 
       if resource[:state] == :up && resource[:ensure] == :present
