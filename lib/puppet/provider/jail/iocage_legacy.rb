@@ -145,6 +145,19 @@ Puppet::Type.type(:jail).provide(:iocage_legacy) do
     @property_flush[:jail_zfs_dataset] = value
   end
 
+  def pkglist=(value)
+    @property_flush[:pkglist] = value
+  end
+
+  def template=(value)
+    @property_flush[:template] = value
+  end
+
+  def release=(value)
+    @property_flush[:release] = value
+  end
+
+
   def wrap_create(jensure = resource[:ensure])
     frel = Facter.value(:os)['release']['full'].gsub(%r{-p\d+$}, '')
 

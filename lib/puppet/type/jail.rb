@@ -41,6 +41,13 @@ Puppet::Type.newtype(:jail) do
     desc 'Interface|Address'
   end
 
+  newproperty(:template) do
+    desc 'Template to use'
+  end
+  newproperty(:release) do
+    desc 'Release to use'
+  end
+
   newproperty(:hostname) do
     desc 'Hostname of the jail'
   end

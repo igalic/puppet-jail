@@ -152,6 +152,14 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
     @property_flush[:pkglist] = value
   end
 
+  def template=(value)
+    @property_flush[:template] = value
+  end
+
+  def release=(value)
+    @property_flush[:release] = value
+  end
+
   def wrap_create(jensure = resource[:ensure])
     frel = Facter.value(:os)['release']['full'].gsub(%r{-p\d+$}, '')
 
