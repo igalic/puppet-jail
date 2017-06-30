@@ -182,9 +182,9 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
 
       pkgfile.write({ pkgs: resource[:pkglist] }.to_json)
       pkgfile.close
-      pkglist = ["--pkglist=#{pkgfile.path}", network.join(' ')]
+      pkglist = ["--pkglist=#{pkgfile.path}", network]
     end
-    iocage(['create', '--force', from, pkglist, create_template, "tag=#{resource[:name]}"].compact.flatten)
+    iocage(['create', '--force', from, pkglist, create_template, "tag=#{resource[:name]}"].flatten.compact)
   end
 
   def wrap_destroy
