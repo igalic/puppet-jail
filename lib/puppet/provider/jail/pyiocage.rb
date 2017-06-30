@@ -173,20 +173,18 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
 
     create_template = jensure == :template ? 'template=yes' : nil
 
+    pkgfile = Tempfile.new('puppet-iocage-pkglist.json')
     unless emptyish(resource[:pkglist])
       network = []
-      network << !emptyish(resource[:ip4_addr]) ? "ip4_addr=#{resource[:ip4_addr]}" : nil
-      network << !emptyish(resource[:ip6_addr]) ? "ip6_addr=#{resource[:ip6_addr]}" : nil
+      network << (!emptyish(resource[:ip4_addr]) ? "ip4_addr=#{resource[:ip4_addr]}" : nil)
+      network << (!emptyish(resource[:ip6_addr]) ? "ip6_addr=#{resource[:ip6_addr]}" : nil)
       raise Puppet::Error, 'pre-installation of packages requires an IP address' if network.compact.empty?
 
-      pkgfile = Tempfile.new('puppet-iocage-pkglist.json')
       pkgfile.write({ pkgs: resource[:pkglist] }.to_json)
       pkgfile.close
-      pkglist = "--pkglist=#{pkgfile.path} #{network.join(' ')}"
+      pkglist = ["--pkglist=#{pkgfile.path}", network.join(' ')]
     end
-    iocage(['create', '--force', from, pkglist, create_template, "tag=#{resource[:name]}"].compact)
-    set_property('ip4_addr', 'none') if jensure == :template && resource[:ip4_addr]
-    set_property('ip6_addr', 'none') if jensure == :template && resource[:ip6_addr]
+    iocage(['create', '--force', from, pkglist, create_template, "tag=#{resource[:name]}"].compact.flatten)
   end
 
   def wrap_destroy
