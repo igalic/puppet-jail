@@ -16,10 +16,17 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
   end
 
   def iocage(*args)
-    self.iocage(args)
+    cmd = ['/usr/local/bin/iocage', args].flatten.join(' ')
+    execute(cmd, override_locale: false)
+  end
+
+  def read_only(_value)
+    raise 'This is a read-only property.'
   end
 
   mk_resource_methods
+
+  alias_method :type=, :read_only
 
   def self.jail_list
     # first, get the fields. We take them from -t, hoping this is less stuff

@@ -81,6 +81,11 @@ Puppet::Type.newtype(:jail) do
     end
   end
 
+  newproperty(:type) do
+    desc 'This read-only property describes the what type of jail this is'
+    newvalues(:jail, :template, :basejail)
+  end
+
   def refresh
     if @parameters[:state] == :up
       provider.restart
