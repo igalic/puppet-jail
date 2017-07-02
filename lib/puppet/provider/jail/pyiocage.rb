@@ -220,7 +220,8 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
         :ip6_addr,
         :hostname,
         :jail_zfs,
-        :jail_zfs_dataset
+        :jail_zfs_dataset,
+        :template
       ]
 
       case resource[:ensure]
