@@ -6,20 +6,26 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
   defaultfor kernel: :freebsd
 
   # this is used for further confinement
-  commands iocage: '/usr/local/bin/iocage'
+  # however, we cannot use it thru `commands`
+  commands unused_iocage: '/usr/local/bin/iocage'
 
-  def self.pyiocage(*args)
+  # we need an UTF-8 locale, so this is what we'll use
+  def self.iocage(*args)
     cmd = ['/usr/local/bin/iocage', args].flatten.join(' ')
     execute(cmd, override_locale: false)
+  end
+
+  def iocage(*args)
+    self.iocage(args)
   end
 
   mk_resource_methods
 
   def self.jail_list
     # first, get the fields. We take them from -t, hoping this is less stuff
-    fields = pyiocage('list', '-lt').split("\n")[1].downcase.split(%r{\s+|\s+}).reject { |f| f == '|' }
-    output  = pyiocage('list', '-Htl').split("\n")
-    output += pyiocage('list', '-Hl').split("\n")
+    fields = iocage('list', '-lt').split("\n")[1].downcase.split(%r{\s+|\s+}).reject { |f| f == '|' }
+    output  = iocage('list', '-Htl').split("\n")
+    output += iocage('list', '-Hl').split("\n")
 
     data = []
 
@@ -83,7 +89,7 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
 
   def self.get_jail_properties(jailname)
     data = {}
-    output = pyiocage('get', 'all', jailname)
+    output = iocage('get', 'all', jailname)
     output.lines.each do |l|
       key, value = l.split(':', 2)
       data[key] = value.chomp
