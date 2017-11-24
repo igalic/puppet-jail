@@ -4,6 +4,7 @@
 # directories and/or zfs mountpoints.
 #
 class jail::setup (
+<<<<<<< HEAD
   $package_name = 'py36-iocage'
 ) {
 
@@ -22,4 +23,12 @@ class jail::setup (
 
   File['/etc/jail.conf'] ~> Service['iocage']
   Package['iocage'] ~> Service['iocage']
+=======
+  String $jail_pool,
+  Jail::Flavor $flavor = 'pyiocage',
+) {
+
+  contain "jail::setup::${flavor}"
+  contain "jail::activate::${flavor}"
+>>>>>>> expand setup for the different flavours of iocage we see in the wild!
 }
