@@ -4,31 +4,20 @@
 # directories and/or zfs mountpoints.
 #
 class jail::setup (
-<<<<<<< HEAD
-  $package_name = 'py36-iocage'
-) {
-
-  package { 'iocage':
-    ensure => installed,
-    name   => $package_name,
-  }
-
-  service { 'iocage':
-    enable => true,
-  }
-
-  file { '/etc/jail.conf':
-    ensure => absent,
-  }
-
-  File['/etc/jail.conf'] ~> Service['iocage']
-  Package['iocage'] ~> Service['iocage']
-=======
   String $jail_pool,
   Jail::Flavor $flavor = 'libiocage',
 ) {
 
   contain "jail::setup::${flavor}"
-  contain "jail::activate::${flavor}"
->>>>>>> expand setup for the different flavours of iocage we see in the wild!
+
+  $binary = $flavor ?  {
+    'iocell'        => '/usr/local/sbin/iocell',
+    'iocage_legacy' => '/usr/local/sbin/iocage',
+    'libiocage'     => '/usr/local/bin/ioc -d error',
+    default         => '/usr/local/bin/iocage',
+  }
+
+  exec { "${binary} ${jail_pool}":
+    refreshonly => true,
+  }
 }
