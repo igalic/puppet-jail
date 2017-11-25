@@ -19,8 +19,8 @@ class jail::setup (
     default         => '/usr/local/bin/iocage',
   }
 
-  exec { "${binary} ${jail_pool}":
+  exec { "${binary} activate ${jail_pool}":
     refreshonly => true,
-    require => Class["Jail::Setup::${cflavor}"],
+    subscribe   => Class["Jail::Setup::${cflavor}"],
   }
 }
