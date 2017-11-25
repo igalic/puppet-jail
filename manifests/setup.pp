@@ -25,7 +25,7 @@ class jail::setup (
   Package['iocage'] ~> Service['iocage']
 =======
   String $jail_pool,
-  Jail::Flavor $flavor = 'pyiocage',
+  Jail::Flavor $flavor = 'libiocage',
 ) {
 
   contain "jail::setup::${flavor}"
