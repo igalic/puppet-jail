@@ -10,6 +10,8 @@ class jail::setup (
 
   contain "jail::setup::${flavor}"
 
+  $cflavor = capitalize($flavor)
+
   $binary = $flavor ?  {
     'iocell'        => '/usr/local/sbin/iocell',
     'iocage_legacy' => '/usr/local/sbin/iocage',
@@ -19,5 +21,6 @@ class jail::setup (
 
   exec { "${binary} ${jail_pool}":
     refreshonly => true,
+    require => Class["Jail::Setup::${cflavor}"],
   }
 }
