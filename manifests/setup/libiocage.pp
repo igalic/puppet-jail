@@ -11,6 +11,7 @@ class jail::setup::libiocage {
     revision => 'master',
   }
   ~> exec { '/usr/bin/make install':
+    cwd         => '/usr/local/src/libiocage',
     refreshonly => true,
   }
 }
