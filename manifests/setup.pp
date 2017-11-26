@@ -20,7 +20,6 @@ class jail::setup (
   }
 
   exec { "${binary} activate ${jail_pool}":
-    refreshonly => true,
     subscribe   => Class["Jail::Setup::${cflavor}"],
   }
 }
