@@ -14,4 +14,9 @@ class jail::setup::libiocage {
     cwd         => '/usr/local/src/libiocage',
     refreshonly => true,
   }
+
+  -> service { 'ioc':
+    ensure => 'running',
+    enable => true,
+  }
 }
