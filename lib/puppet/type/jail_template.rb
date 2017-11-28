@@ -29,4 +29,36 @@ Puppet::Type.newtype(:jail_template) do
     desc "A script (one line per entry) to execute after (optionally) installing packages."
   end
 
+  def self.validate_ip(ip)
+    return true if ip.nil?
+
+    netif, ip_addr = ip.split('|')
+    return false if netif.nil?
+    return false if ip_addr.nil?
+
+    _ = IPAddr.new(ip_addr)
+    return true
+  rescue IPAddr::InvalidAddressError
+    return false
+  end
+
+  newparam(:ip4_addr) do
+    desc "ip4_addr only used for installing packages"
+    validate do |ip|
+      validate_ip(ip)
+    end
+  end
+
+  newparam(:ip6_addr) do
+    desc "ip6_addr only used for installing packages"
+    validate do |ip|
+      validate_ip(ip)
+    end
+  end
+
+  validate do
+    if self[:pkglist] && !(self[:ip4_addr] || self[:ip6_addr])
+      raise ArgumentError, "a Network setup is required for installing packages. Please set ip4_addr or ip6_addr!"
+    end
+  end
 end

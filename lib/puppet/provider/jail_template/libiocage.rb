@@ -58,7 +58,31 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def create
-    ioc('create', '--release', resource[:release], '--name', resource[:name])
+    ip4_addr = ip6_addr = nil
+    ip4_addr = "ip4_addr='#{resource[:ip4_addr]}'" if resource[:ip4_addr]
+    ip6_addr = "ip6_addr='#{resource[:ip6_addr]}'" if resource[:ip6_addr]
+
+    ioc('create', '--release', resource[:release], '--name', resource[:name], ip4_addr, ip6_addr)
+    if resource[:pkglist] || resource[:postscript]
+      # we'll need to start the jail for this to work
+      ioc('start', resource[:name])
+
+      if resource[:pkglist]
+        ioc('exec', resource[:name], 'env', 'ASSUME_ALWAYS_YES=YES', 'pkg', 'bootstrap')
+        ioc('exec', resource[:name], 'pkg', 'install', '-y', resource[:pkglist].join(' '))
+        ioc('set', 'pkglist=' + resource[:pkglist].join(','), resource[:name])
+      end
+
+      if resource[:postscript]
+        ioc('exec', resource[:name], resource[:postscript].join(';'))
+        ioc('set', 'postscript=' + resource[:postscript].join(','), resource[:name])
+      end
+
+      ioc('set', 'ip4_addr=', 'ip6_addr=', resource[:name])
+      ioc('stop', resource[:name])
+    end
+    # the last action is to set template=yes
+    ioc('set', 'template=yes', resource[:name])
   end
 
   def destroy
