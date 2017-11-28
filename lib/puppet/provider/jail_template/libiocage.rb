@@ -88,4 +88,9 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   def destroy
     ioc('destroy', '--force', resource[:name])
   end
+
+  def flush
+    destroy
+    create
+  end
 end
