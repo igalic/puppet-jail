@@ -45,6 +45,28 @@ Puppet::Type.newtype(:jail_template) do
     end
   end
 
+  newproperty(:fstab, array_matching: :all) do
+    desc <<-EOT
+    An array of of Hashes describing the fstab entries of the jail.
+
+    The Struct is of the type:
+       { src: /path, [dst: /path], [rw: false]}.'
+
+       dst is optional
+       rw is also optional, and defaults to false
+
+    Note that this fstab has no `type`, because it's always `nullfs`!
+    EOT
+
+    attr_reader :should
+
+    # overridden so that we match with self.should
+    def insync?(is)
+      is = [] if !is || is == :absent
+      is.sort == self.should.sort
+    end
+  end
+
   def self.validate_ip(ip)
     return true if ip.nil?
 
