@@ -61,4 +61,8 @@ Puppet::Type.newtype(:jail_template) do
       raise ArgumentError, "a Network setup is required for installing packages. Please set ip4_addr or ip6_addr!"
     end
   end
+
+  autorequire(:jail_release) do
+    self[:release]
+  end
 end
