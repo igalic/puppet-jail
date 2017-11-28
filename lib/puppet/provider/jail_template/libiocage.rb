@@ -68,8 +68,8 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
       ioc('start', resource[:name])
 
       if resource[:pkglist]
-        ioc('exec', resource[:name], 'env', 'ASSUME_ALWAYS_YES=YES', 'pkg', 'bootstrap')
-        ioc('exec', resource[:name], 'pkg', 'install', '-y', resource[:pkglist].join(' '))
+        ioc('exec', resource[:name], 'env ASSUME_ALWAYS_YES=YES pkg bootstrap')
+        ioc('exec', resource[:name], 'pkg install -y', resource[:pkglist].join(' '))
         ioc('set', 'pkglist=' + resource[:pkglist].join(','), resource[:name])
       end
 
