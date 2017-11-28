@@ -16,7 +16,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def self.get_ioc_json_array(arg)
-    return nil if arg == '-'
+    return nil if arg == '-' || arg == ''
     return nil if arg.nil?
     return arg if arg.is_a?(Array)
     return arg.split(',') if arg.is_a?(String)
