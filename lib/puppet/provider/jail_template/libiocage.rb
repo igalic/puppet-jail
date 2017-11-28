@@ -38,9 +38,8 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def self.instances
-    templates = JSON.load(ioc('list', '--template', '--output-format=json', '--output=name,release,pkglist,postscript'))
+    templates = JSON.parse(ioc('list', '--template', '--output-format=json', '--output=name,release,pkglist,postscript'))
     templates.map do |r|
-
       pkglist = get_ioc_json_array(r['pkglist'])
       postscript = get_ioc_json_array(r['postscript'])
 
@@ -49,7 +48,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
         ensure: :present,
         release: r['release'],
         pkglist: pkglist,
-        postscript: postscript,
+        postscript: postscript
       )
     end
   end
