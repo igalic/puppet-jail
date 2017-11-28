@@ -15,6 +15,18 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     self.class.ioc(args)
   end
 
+  def self.get_ioc_json_array(arg)
+    return nil if arg == '-'
+    return nil if arg.nil?
+    return arg if arg.is_a?(Array)
+    return arg.split(',') if arg.is_a?(String)
+    raise("Unexpected Type for 'arg'")
+  end
+
+  def get_ioc_json_array(arg)
+    self.class.get_ioc_json_array(arg)
+  end
+
   mk_resource_methods
 
   def self.prefetch(resources)
@@ -26,8 +38,20 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def self.instances
-    templates = JSON.load(ioc('list', '--template', '--output-format=json', '--output=name,release'))
-    templates.map { |r| new(name: r["name"], release: r["release"], ensure: :present) }
+    templates = JSON.load(ioc('list', '--template', '--output-format=json', '--output=name,release,pkglist,postscript'))
+    templates.map do |r|
+
+      pkglist = get_ioc_json_array(r['pkglist'])
+      postscript = get_ioc_json_array(r['postscript'])
+
+      new(
+        name: r['name'],
+        ensure: :present,
+        release: r['release'],
+        pkglist: pkglist,
+        postscript: postscript,
+      )
+    end
   end
 
   def exists?
