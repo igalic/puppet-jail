@@ -22,11 +22,27 @@ Puppet::Type.newtype(:jail_template) do
   end
 
   newproperty(:pkglist, array_matching: :all) do
-    desc "A list of packages to be installed"
+    desc 'A list of packages to be installed'
+
+    attr_reader :should
+
+    # overridden so that we match with self.should
+    def insync?(is)
+      is = [] if !is || is == :absent
+      is.sort == should.sort
+    end
   end
 
   newproperty(:postscript, array_matching: :all) do
-    desc "A script (one line per entry) to execute after (optionally) installing packages."
+    desc 'A script (one line per entry) to execute after (optionally) installing packages.'
+
+    attr_reader :should
+
+    # overridden so that we match with self.should
+    def insync?(is)
+      is = [] if !is || is == :absent
+      is.sort == self.should.sort
+    end
   end
 
   def self.validate_ip(ip)

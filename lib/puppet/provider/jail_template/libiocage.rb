@@ -7,7 +7,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   commands ioc: '/usr/local/bin/ioc'
 
   def self.ioc(*args)
-    cmd = ['/usr/local/bin/ioc', args].flatten.join(' ')
+    cmd = ['/usr/local/bin/ioc', args].flatten.compact.join(' ')
     execute(cmd, override_locale: false, failonfail: true, combine: true)
   end
 
