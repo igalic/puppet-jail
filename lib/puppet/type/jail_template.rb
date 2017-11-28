@@ -43,16 +43,16 @@ Puppet::Type.newtype(:jail_template) do
   end
 
   newparam(:ip4_addr) do
-    desc "ip4_addr only used for installing packages"
+    desc "ip4_addr only used for installing packages. The IPv4 Address or CIDR must be of the form: 'vtnet0|172.16.0.12/12'"
     validate do |ip|
-      validate_ip(ip)
+      Puppet::Type::Jail_template::validate_ip(ip)
     end
   end
 
   newparam(:ip6_addr) do
-    desc "ip6_addr only used for installing packages"
+    desc "ip6_addr only used for installing packages. The IPv6 Address or CIDR must be of the form: 'vtnet0|2001:db8:a0b:12f0::1/64'"
     validate do |ip|
-      validate_ip(ip)
+      Puppet::Type::Jail_template::validate_ip(ip)
     end
   end
 
