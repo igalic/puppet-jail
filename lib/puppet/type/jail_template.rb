@@ -53,17 +53,22 @@ Puppet::Type.newtype(:jail_template) do
        { src: /path, [dst: /path], [rw: false]}.'
 
        dst is optional
+       type is optional, currently only nullfs is supported
        rw is also optional, and defaults to false
-
-    Note that this fstab has no `type`, because it's always `nullfs`!
     EOT
 
     attr_reader :should
 
+    validate do |fs|
+      wrong = fs.keys - %w[src dst type rw]
+      raise ArgumentError, "Invalid keys supplied for fstab: #{wrong}" unless wrong.empty?
+    end
+
     # overridden so that we match with self.should
     def insync?(is)
-      is = [] if !is || is == :absent
-      is.sort == self.should.sort
+      # order in these arrays is kinda important, and ruby's Hash.== compares
+      # hashes structurally, so we should be set here:
+      is == self.should
     end
   end
 
