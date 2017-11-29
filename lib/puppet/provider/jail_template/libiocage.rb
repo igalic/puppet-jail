@@ -43,6 +43,8 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
       pkglist = get_ioc_json_array(r['pkglist'])
       postscript = get_ioc_json_array(r['postscript'])
 
+      fstab = ioc('fstab', 'show', r['name'])
+
       new(
         name: r['name'],
         ensure: :present,
@@ -83,6 +85,22 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     end
     # the last action is to set template=yes
     ioc('set', 'template=yes', resource[:name])
+  end
+
+  def fstab=(value)
+    desired_fstab = Array(value == :absent ? [] : value)
+    current_fstab = Array(fstab == :absent ? [] : fstab)
+    (current_fstab - desired_fstab).each do |f|
+      rw = '-rw' if ["true", :true, true].include? f["rw"]
+      ioc('fstab', 'rm', rw, f["src"], resource[:name])
+    end
+
+    (desired_fstab - current_fstab).each do |f|
+      rw = nil
+      rw = '-rw' if ["true", :true, true].include? f["rw"]
+      ioc('fstab', 'add', rw, f["src"], f["dst"], resource[:name])
+    end
+    @property_flush[:fstab] = value
   end
 
   def destroy
