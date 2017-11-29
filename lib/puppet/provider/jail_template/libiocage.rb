@@ -128,7 +128,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     end
 
     if @property_flush[:fstab]
-      desired_fstab = Array(value == :absent ? [] : value)
+      desired_fstab = Array(resource[:fstab] == :absent ? [] : resource[:fstab])
       current_fstab = Array(fstab == :absent ? [] : fstab)
       (current_fstab - desired_fstab).each do |f|
         rw = '-rw' if ["true", :true, true].include? f["rw"]
