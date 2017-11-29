@@ -54,7 +54,14 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
         src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
         raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
         rw = !(opts =~ %r{\brw\b}).nil?
-        { src: src, dst: dst, type: type, rw: rw }
+
+        fs = { src: src, dst: dst, type: type, rw: rw }
+        # apparently, munge is not ran after self.instances,
+        # so we have to do repeat this:
+        fs.delete(:type) if fs[:type] == "nullfs"
+        fs.delete(:dst) if fs[:dst] =~ %r{#{fs[:src]}$}
+        fs.delete(:rw) if [:false, "false", false].include? fs[:rw]
+        fs
       end.compact
 
       new(
