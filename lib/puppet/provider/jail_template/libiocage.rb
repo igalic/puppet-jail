@@ -131,14 +131,14 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
       desired_fstab = Array(resource[:fstab] == :absent ? [] : resource[:fstab])
       current_fstab = Array(fstab == :absent ? [] : fstab)
       (current_fstab - desired_fstab).each do |f|
-        rw = '-rw' if ["true", :true, true].include? f["rw"]
-        ioc('fstab', 'rm', rw, f["src"], resource[:name])
+        rw = '-rw' if ["true", :true, true].include? f[:rw]
+        ioc('fstab', 'rm', rw, f[:src], resource[:name])
       end
 
       (desired_fstab - current_fstab).each do |f|
         rw = nil
-        rw = '-rw' if ["true", :true, true].include? f["rw"]
-        ioc('fstab', 'add', rw, f["src"], f["dst"], resource[:name])
+        rw = '-rw' if ["true", :true, true].include? f[:rw]
+        ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])
       end
     end
     @property_flush = resource.to_hash

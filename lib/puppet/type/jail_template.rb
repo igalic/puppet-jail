@@ -59,6 +59,16 @@ Puppet::Type.newtype(:jail_template) do
 
     attr_reader :should
 
+    munge do |fs|
+      # convert string to keys
+      fs = Hash[fs.map { |k,v| [k.to_sym, v] }]
+      # remove defaults
+      fs.delete(:type) if fs[:type] == "nullfs"
+      fs.delete(:dst) if fs[:dst] =~ %r{#{fs[:src]}$}
+      fs.delete(:rw) if [:false, "false", false].include? fs[:rw]
+      fs
+    end
+
     validate do |fs|
       wrong = fs.keys - %w[src dst type rw]
       raise ArgumentError, "Invalid keys supplied for fstab: #{wrong}" unless wrong.empty?
