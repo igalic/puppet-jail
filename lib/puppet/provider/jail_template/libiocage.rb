@@ -29,6 +29,11 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
 
   mk_resource_methods
 
+  def initialize(value = {})
+    super(value)
+    @property_flush = {}
+  end
+
   def self.prefetch(resources)
     instances.each do |prov|
       if (resource = resources[prov.name])
@@ -44,13 +49,21 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
       postscript = get_ioc_json_array(r['postscript'])
 
       fstab = ioc('fstab', 'show', r['name'])
+      fstabs = fstab.split("\n").map do |l|
+        next if l =~ %r{^$|^#}
+        src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
+        raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
+        rw = !(opts =~ %r{\brw\b}).nil?
+        { src: src, dst: dst, type: type, rw: rw }
+      end.compact
 
       new(
         name: r['name'],
         ensure: :present,
         release: r['release'],
         pkglist: pkglist,
-        postscript: postscript
+        postscript: postscript,
+        fstab: fstabs
       )
     end
   end
@@ -87,19 +100,19 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     ioc('set', 'template=yes', resource[:name])
   end
 
-  def fstab=(value)
-    desired_fstab = Array(value == :absent ? [] : value)
-    current_fstab = Array(fstab == :absent ? [] : fstab)
-    (current_fstab - desired_fstab).each do |f|
-      rw = '-rw' if ["true", :true, true].include? f["rw"]
-      ioc('fstab', 'rm', rw, f["src"], resource[:name])
-    end
+  def pkglist=(value)
+    @property_flush[:pkglist] = value
+  end
 
-    (desired_fstab - current_fstab).each do |f|
-      rw = nil
-      rw = '-rw' if ["true", :true, true].include? f["rw"]
-      ioc('fstab', 'add', rw, f["src"], f["dst"], resource[:name])
-    end
+  def postprovision=(value)
+    @property_flush[:postprovision] = value
+  end
+
+  def release=(value)
+    @property_flush[:release] = value
+  end
+
+  def fstab=(value)
     @property_flush[:fstab] = value
   end
 
@@ -108,7 +121,26 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def flush
-    destroy
-    create
+    # the only way to update release, pkglist, or postscript is to recreate
+    if @property_flush[:release] || @property_flush[:pkglist] || @property_flush[:postscript]
+      destroy
+      create
+    end
+
+    if @property_flush[:fstab]
+      desired_fstab = Array(value == :absent ? [] : value)
+      current_fstab = Array(fstab == :absent ? [] : fstab)
+      (current_fstab - desired_fstab).each do |f|
+        rw = '-rw' if ["true", :true, true].include? f["rw"]
+        ioc('fstab', 'rm', rw, f["src"], resource[:name])
+      end
+
+      (desired_fstab - current_fstab).each do |f|
+        rw = nil
+        rw = '-rw' if ["true", :true, true].include? f["rw"]
+        ioc('fstab', 'add', rw, f["src"], f["dst"], resource[:name])
+      end
+    end
+    @property_flush = resource.to_hash
   end
 end
