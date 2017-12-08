@@ -6,15 +6,6 @@ Puppet::Type.type(:jail_release).provide(:libiocage) do
   # this is used for further confinement
   commands ioc: '/usr/local/bin/ioc'
 
-  def self.ioc(*args)
-    cmd = ['/usr/local/bin/ioc', args].flatten.join(' ')
-    execute(cmd, override_locale: false, failonfail: true, combine: true)
-  end
-
-  def ioc(*args)
-    self.class.ioc(args)
-  end
-
   mk_resource_methods
 
   def self.prefetch(resources)
@@ -26,8 +17,8 @@ Puppet::Type.type(:jail_release).provide(:libiocage) do
   end
 
   def self.instances
-    releases = JSON.load(ioc('list', '--release', '--output-format=json'))
-    releases.map { |r| new(name: r["name"], ensure: :present) }
+    releases = JSON.load(ioc('list', '--release --output-format=json'))
+    releases.map { |r| new(name: r['name'], ensure: :present) }
   end
 
   def exists?
