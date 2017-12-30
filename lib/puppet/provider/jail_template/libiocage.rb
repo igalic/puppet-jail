@@ -11,6 +11,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   mk_resource_methods
 
   extend PuppetX::Zleslie::Helper
+  include PuppetX::Zleslie::Helper
 
   def initialize(value = {})
     super(value)

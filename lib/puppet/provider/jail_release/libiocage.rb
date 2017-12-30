@@ -1,12 +1,17 @@
+require 'puppetx/zleslie/helper'
+
 Puppet::Type.type(:jail_release).provide(:libiocage) do
   desc 'Manage jails release base downloads using ioc(8)'
   confine    kernel: :freebsd
   defaultfor kernel: :freebsd
 
   # this is used for further confinement
-  commands ioc: '/usr/local/bin/ioc'
+  commands _ioc: '/usr/local/bin/ioc'
 
   mk_resource_methods
+
+  extend PuppetX::Zleslie::Helper
+  include PuppetX::Zleslie::Helper
 
   def self.prefetch(resources)
     instances.each do |prov|

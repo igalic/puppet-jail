@@ -1,10 +1,15 @@
+require 'puppetx/zleslie/helper'
+
 Puppet::Type.type(:jail).provide(:libiocage) do
   desc 'Manage creating of jails using ioc(8)'
   confine    kernel: :freebsd
   defaultfor kernel: :freebsd
 
   # this is used for further confinement
-  commands ioc: '/usr/local/bin/ioc'
+  commands _ioc: '/usr/local/bin/ioc'
+
+  extend PuppetX::Zleslie::Helper
+  include PuppetX::Zleslie::Helper
 
   mk_resource_methods
 
