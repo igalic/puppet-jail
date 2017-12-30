@@ -1,8 +1,11 @@
 # we have a lot of shared code
-module Puppet::Puppet_X::Zleslie::Helper
+module PuppetX; end
+module PuppetX::Zleslie; end
+
+module PuppetX::Zleslie::Helper
   def self.ioc(*args)
     cmd = ['/usr/local/bin/ioc', args].flatten.compact.join(' ')
-    execute(cmd, override_locale: false, failonfail: true, combine: true)
+    Puppet::Util::Execution.execute(cmd, override_locale: false, failonfail: true, combine: true)
   end
 
   def ioc(*args)
