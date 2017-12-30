@@ -17,7 +17,7 @@ Puppet::Type.type(:jail_release).provide(:libiocage) do
   end
 
   def self.instances
-    releases = JSON.load(ioc('list', '--release --output-format=json'))
+    releases = JSON.load(ioc('list', '--release', '--output-format=json'))
     releases.map { |r| new(name: r['name'], ensure: :present) }
   end
 
