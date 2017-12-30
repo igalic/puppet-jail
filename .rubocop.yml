@@ -46,7 +46,11 @@ Style/HashSyntax:
 Style/RedundantReturn:
   Enabled: True
 
+<<<<<<< HEAD
 Layout/EndOfLine:
+=======
+Style/EndOfLine:
+>>>>>>> isync Gemfile & rubocopy config
   Enabled: False
 
 Lint/AmbiguousOperator:
@@ -496,9 +500,12 @@ Metrics/AbcSize:
 Metrics/PerceivedComplexity:
   Enabled: False
 
+<<<<<<< HEAD
 Lint/UselessAssignment:
   Enabled: True
 
+=======
+>>>>>>> isync Gemfile & rubocopy config
 Layout/ClosingParenthesisIndentation:
   Enabled: True
 
@@ -524,11 +531,11 @@ RSpec/NamedSubject:
 RSpec/RepeatedDescription:
   Enabled: False
 
-# disabled for simpler testing on multiple platforms in case statement
-RSpec/RepeatedExample:
+RSpec/NestedGroups:
   Enabled: False
 
-RSpec/NestedGroups:
+# this is broken on ruby1.9
+Layout/IndentHeredoc:
   Enabled: False
 
 # this is broken on ruby1.9
