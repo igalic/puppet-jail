@@ -32,6 +32,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       fstab = ioc('fstab', 'show', r['name'])
       fstabs = fstab.split("\n").map do |l|
         next if l =~ %r{^$|^#}
+        next if l =~ %r{# iocage-auto$}
         src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
         raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
         rw = !(opts =~ %r{\brw\b}).nil?
