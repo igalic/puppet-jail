@@ -23,7 +23,7 @@ Puppet::Type.type(:jail_release).provide(:libiocage) do
 
   def self.instances
     releases = JSON.load(ioc('list', '--release', '--output-format=json'))
-    releases.map { |r| new(name: r['name'], ensure: :present) }
+    releases.map { |r| new(name: r['full_name'], ensure: :present) }
   end
 
   def exists?
@@ -32,9 +32,11 @@ Puppet::Type.type(:jail_release).provide(:libiocage) do
 
   def create
     ioc('fetch', '--release', resource[:name])
+    resource[:ensure] = :present
   end
 
   def destroy
     ioc('destroy', '--force', '--release', resource[:name])
+    resource[:ensure] = :absent
   end
 end
