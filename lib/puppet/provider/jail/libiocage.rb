@@ -27,7 +27,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def self.instances
-    jails = JSON.parse(ioc('list', '--output-format=json --output=name,release,from_template'))
+    jails = JSON.parse(ioc('list', '--output-format=json --output=name,release,user.template'))
     jails.map do |r|
       fstab = ioc('fstab', 'show', r['name'])
       fstabs = fstab.split("\n").map do |l|
@@ -50,6 +50,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         ensure: :present,
         name: r['name'],
         release: r['release'],
+        template: r['user.template']
         fstab: fstabs
       )
     end
@@ -64,13 +65,17 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     ip4_addr = "ip4_addr='#{resource[:ip4_addr]}'" if resource[:ip4_addr]
     ip6_addr = "ip6_addr='#{resource[:ip6_addr]}'" if resource[:ip6_addr]
 
-    ioc('create', '--release', resource[:release], '--name', resource[:name], ip4_addr, ip6_addr)
-    ioc('set', 'ip4_addr=', 'ip6_addr=', resource[:name])
-    ioc('stop', resource[:name])
+    ioc('create', '--release', resource[:release], '--basejail', '--name',
+      resource[:name], ip4_addr, ip6_addr)
+    resource[:ensure] = :present
   end
 
   def release=(value)
     @property_flush[:release] = value
+  end
+
+  def template=(value)
+    @property_flush[:template] = value
   end
 
   def fstab=(value)
@@ -79,6 +84,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
   def destroy
     ioc('destroy', '--force', resource[:name])
+    resource[:ensure] = :absent
   end
 
   def flush

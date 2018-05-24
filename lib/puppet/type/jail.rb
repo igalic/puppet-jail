@@ -28,17 +28,6 @@ Puppet::Type.newtype(:jail) do
     newvalues(:up, :down)
   end
 
-  newproperty(:type) do
-    desc <<-EOM
-         Type of jail. This can be `jail`, `basejail`, or `template`
-
-         Changes to this property will lead to destruction and rebuild of the jail.
-    EOM
-
-    newvalues(:jail, :basejail, :template)
-    defaultto(:jail)
-  end
-
   newproperty(:release) do
     desc <<-EOM
          FreeBSD release of this jail. `EMPTY` if this is a Linux jail.  `release` and `template` are mutually exclusive.
@@ -60,6 +49,14 @@ Puppet::Type.newtype(:jail) do
     end
   end
 
+  newproperty(:template) do
+    desc <<-EOM
+         Template jail to base this one off. `release` and `template` are mutually exclusive.
+
+         Changes to this property will lead to destruction and rebuild of the jail.
+    EOM
+  end
+
   newproperty(:ip4_addr) do
     desc <<-EOM
          Interface|Address[,Interface|Address[...]]
@@ -76,92 +73,33 @@ Puppet::Type.newtype(:jail) do
     EOM
   end
 
-  newproperty(:template) do
-    desc <<-EOM
-         Template jail to base this one off. `release` and `template` are mutually exclusive.
+  newproperty(:fstabs) do
+    desc<<-EOM
+        An array of Hashes of directories to mount' of properties for this jail
 
-         Changes to this property will lead to destruction and rebuild of the jail.
-    EOM
+        `src` is the path on the host. the optional `dst` is the destination
+        in the container. `rw` defaults to `false`. Switch this to `true` to
+        allow container processes to write to this mount point.
+
+        Example:
+        [
+          { src => '/srv/www'},
+          { src => '/data/containers/db/zoom', dst => '/var/lib/pg/dbs/zoom', rw => true}
+          { src => '/data/containers/webdanger/bar', dst => '/srv/www/danger' },
+        ]
+      EOM
   end
 
-  newproperty(:pcpu) do
-    desc 'Cap the CPU usage of a jail'
-  end
-
-  newproperty(:memoryuse) do
-    desc 'Cap the RAM usage of a jail'
-  end
-
-  newproperty(:quota) do
-    desc 'Set maximum disk usage for a jail'
+  newproperty(:props) do
+    desc 'A Hash of properties for this jail'
   end
 
   newproperty(:rlimits) do
-    desc 'Enable|Disable Limits'
-    newvalues(:on, :off)
-  end
+    desc<<-EOM
+      A Hash of rlimits for this jail
 
-  newproperty(:jail_zfs) do
-    desc 'Enable the jail_zfs'
-    newvalues(:on, :off)
-  end
-
-  newparam(:allow_restart) do
-    desc 'Allow restarting of this jail'
-    newvalues(:true, :false)
-    defaultto(:true)
-  end
-
-  newparam(:allow_rebuild) do
-    desc 'Allow destroying! and rebuilding of this jail'
-    newvalues(:true, :false)
-    defaultto(:true)
-  end
-
-  newparam(:user_data) do
-    desc <<-EOM
-         Rendered content to pipe to a jailed shell upon creation
-
-         Changes to this property will lead to destruction and rebuild of the jail.
-    EOM
-  end
-
-  newparam(:pkglist, array_matching: :all) do
-    desc 'A list of packages to be installed in this jail before startup'
-    def insync?(is)
-      Array(is).sort == Array(@shouldA).sort
-    end
-  end
-
-  newproperty(:fstab, array_matching: :all) do
-    desc 'A list of fstab entries for this jail to be mounted into. By default these are nullfs mounts.'
-    # TODO: add validation here
-  end
-
-  newproperty(:properties) do
-    desc 'All properties (that deviate from the default)'
-  end
-
-  # global validation rules
-  if Puppet.run_mode.master?
-    validate do
-      raise ArgumentError, 'Templates cannot be set to start on boot!' if self[:boot] == :on && self[:type] == :template
-      raise ArgumentError, 'Templates cannot be set to started!' if self[:state] == :up && self[:type] == :template
-      raise ArgumentError, 'Templates cannot have `fstab` entries!' if !self[:fstab].nil? && self[:type] == :template
-      raise ArgumentError, 'pkglist will need an IP address!' if !self[:pkglist].nil? && self[:ip4_addr].nil? && self[:ip6_addr].nil?
-      raise ArgumentError, 'Cannot set both, `template` and `release` at the same time!' if self[:release] && self[:template]
-      raise ArgumentError, 'Must supply either `template` or `release`!' if !self[:release] && !self[:template]
-    end
-  end
-
-  # `jail { x: release => foo }` should depend on jail_release { foo: }
-  autorequire(:jail_release) do
-    self[:release] if self[:release]
-  end
-
-  # `jail { x: template => foo }` should depend on jail { foo: template => yes }
-  autorequire(:jail) do
-    self[:template] if self[:template]
+      Please see rctl(8) for a complete documentation
+     EOM
   end
 
   def refresh
@@ -170,5 +108,13 @@ Puppet::Type.newtype(:jail) do
     else
       debug 'Skipping restart: jail not running'
     end
+  end
+
+  autorequire(:jail_release) do
+    self[:release] if self[:release]
+  end
+
+  autorequire(:jail_template) do
+    self[:template] if self[:template]
   end
 end
