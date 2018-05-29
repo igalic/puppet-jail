@@ -32,11 +32,11 @@ Puppet::Type.type(:jail_release).provide(:libiocage) do
 
   def create
     ioc('fetch', '--release', resource[:name])
-    resource[:ensure] = :present
+    @property_hash = {name: resource[:name], ensure: :present}
   end
 
   def destroy
     ioc('destroy', '--force', '--release', resource[:name])
-    resource[:ensure] = :absent
+    @property_hash[:ensure] = :absent
   end
 end

@@ -89,7 +89,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     end
     # the last action is to set template=yes
     ioc('set', 'template=yes', resource[:name])
-    resource[:ensure] = :present
+    @property_hash = @property_flush
   end
 
   def pkglist=(value)
@@ -110,7 +110,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
 
   def destroy
     ioc('destroy', '--force', resource[:name])
-    resource[:ensure] = :absent
+    @property_hash[:ensure] = :absent
   end
 
   def flush
