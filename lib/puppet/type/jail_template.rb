@@ -109,6 +109,25 @@ Puppet::Type.newtype(:jail_template) do
     end
   end
 
+  newproperty(:props) do
+    desc 'A Hash of properties for this jail'
+  end
+
+  newproperty(:rlimits) do
+    desc<<-EOM
+      A Hash of rlimits for this jail
+
+      Example:
+        jail { xforkb:
+           ensure => present,
+          rlimits => { nproc => {action => deny, amount => 50}}
+        }
+
+      This creates a jail that makes it impossible to fork-bomb, since we
+      will not allow to spawn more than 50 processes (nproc)
+     EOM
+  end
+
   validate do
     if self[:pkglist] && !(self[:ip4_addr] || self[:ip6_addr])
       raise ArgumentError, "a Network setup is required for installing packages. Please set ip4_addr or ip6_addr!"
