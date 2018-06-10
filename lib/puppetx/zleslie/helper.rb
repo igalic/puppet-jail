@@ -60,5 +60,5 @@ module PuppetX::Zleslie::Helper
     props.delete("user.pkglist")
     props.delete("user.postscript")
     props.delete("user.template")
-    props
+    Set.new(props)
 end
