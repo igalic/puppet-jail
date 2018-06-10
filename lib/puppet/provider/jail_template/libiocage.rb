@@ -27,26 +27,18 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def self.instances
-    templates = JSON.parse(ioc('list', '--template', '--output-format=json', '--output=name,release,pkglist,postscript'))
+    default_props = Set.new(get_all_props("defaults"))
+
+    templates = JSON.parse(ioc('list', '--template', '--output-format=json',
+    '--output=name,release,ip4_addr,ip6_addr,rlimits,user.pkglist,user.postscript'))
     templates.map do |r|
-      pkglist = get_ioc_json_array(r['pkglist'])
-      postscript = get_ioc_json_array(r['postscript'])
+      pkglist = get_ioc_json_array(r['user.pkglist'])
+      postscript = get_ioc_json_array(r['user.postscript'])
 
-      fstab = ioc('fstab', 'show', r['name'])
-      fstabs = fstab.split("\n").map do |l|
-        next if l =~ %r{^$|^#}
-        src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
-        raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
-        rw = !(opts =~ %r{\brw\b}).nil?
+      fstabs = get_fstab(jail_name)
 
-        fs = { src: src, dst: dst, type: type, rw: rw }
-        # apparently, munge is not ran after self.instances,
-        # so we have to do repeat this:
-        fs.delete(:type) if fs[:type] == "nullfs"
-        fs.delete(:dst) if fs[:dst] =~ %r{#{fs[:src]}$}
-        fs.delete(:rw) if [:false, "false", false].include? fs[:rw]
-        fs
-      end.compact
+      props = Set.new(get_jail_properties(r['name']))
+      props = props - default_props
 
       new(
         name: r['name'],
@@ -54,7 +46,11 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
         release: r['release'],
         pkglist: pkglist,
         postscript: postscript,
-        fstab: fstabs
+        ip4_addr: get_ioc_json_string(r['ip4_addr']),
+        ip6_addr: get_ioc_json_string(r['ip6_addr']),
+        rlimits: get_ioc_json_string(r['rlimits']),
+        fstab: fstabs,
+        props: props.to_h,
       )
     end
   end
