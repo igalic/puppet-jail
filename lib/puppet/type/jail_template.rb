@@ -1,7 +1,7 @@
 # This type is meant to facilitate the deployment of FreeBSD jails by helping
 # create templates
 Puppet::Type.newtype(:jail_template) do
-  @doc = <<-'EOT'
+  @doc = <<-EOT
     This type is meant to facilitate the deployment of FreeBSD jails by helping
     create templates.
 
