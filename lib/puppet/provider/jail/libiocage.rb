@@ -27,31 +27,26 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def self.instances
-    jails = JSON.parse(ioc('list', '--output-format=json --output=name,release,user.template'))
-    jails.map do |r|
-      fstab = ioc('fstab', 'show', r['name'])
-      fstabs = fstab.split("\n").map do |l|
-        next if l =~ %r{^$|^#}
-        next if l =~ %r{# iocage-auto$}
-        src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
-        raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
-        rw = !(opts =~ %r{\brw\b}).nil?
+    default_props = get_all_props("defaults")
 
-        fs = { src: src, dst: dst, type: type, rw: rw }
-        # apparently, munge is not ran after self.instances,
-        # so we have to do repeat this:
-        fs.delete(:type) if fs[:type] == 'nullfs'
-        fs.delete(:dst) if fs[:dst] =~ %r{#{fs[:src]}$}
-        fs.delete(:rw) if [:false, 'false', false].include? fs[:rw]
-        fs
-      end.compact
+    jails = JSON.parse(ioc('list', '--output-format=json',
+       '--output=name,release,ip4_addr,ip6_addr,rlimits,user.template'))
+    jails.map do |r|
+      fstabs = get_fstabs(r['name'])
+
+      props = get_jail_properties(r['name'])
+      props = props - default_props
 
       new(
         ensure: :present,
         name: r['name'],
         release: r['release'],
-        template: r['user.template']
-        fstab: fstabs
+        template: get_ioc_json_string(r['user.template']),
+        ip4_addr: get_ioc_json_string(r['ip4_addr']),
+        ip6_addr: get_ioc_json_string(r['ip6_addr']),
+        rlimits: get_ioc_json_string(r['rlimits']),
+        fstab: fstabs,
+        props: props.to_h,
       )
     end
   end

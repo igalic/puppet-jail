@@ -27,7 +27,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def self.instances
-    default_props = Set.new(get_all_props("defaults"))
+    default_props = get_all_props("defaults")
 
     templates = JSON.parse(ioc('list', '--template', '--output-format=json',
     '--output=name,release,ip4_addr,ip6_addr,rlimits,user.pkglist,user.postscript'))
@@ -37,7 +37,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
 
       fstabs = get_fstab(jail_name)
 
-      props = Set.new(get_jail_properties(r['name']))
+      props = get_jail_properties(r['name'])
       props = props - default_props
 
       new(
