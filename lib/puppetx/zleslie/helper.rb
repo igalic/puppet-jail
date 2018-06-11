@@ -59,9 +59,11 @@ module PuppetX::Zleslie::Helper
     props.delete('ip6_addr')
     props.delete('rlimits')
     props.delete('release')
+    props.delete('template')
     props.delete('user.pkglist')
     props.delete('user.postscript')
     props.delete('user.template')
+    props['jail_zfs_dataset'] = '-' if props['jail_zfs_dataset'] == 'None'
     Set.new(props)
   end
 end
