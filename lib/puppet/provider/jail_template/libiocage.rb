@@ -37,7 +37,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
 
       fstabs = get_fstabs(r['name'])
 
-      props = get_jail_properties(r['name'])
+      props = get_all_props(r['name'])
       props -= default_props
 
       new(
