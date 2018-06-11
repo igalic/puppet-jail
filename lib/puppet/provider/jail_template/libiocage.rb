@@ -35,7 +35,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
       pkglist = get_ioc_json_array(r['user.pkglist'])
       postscript = get_ioc_json_array(r['user.postscript'])
 
-      fstabs = get_fstab(jail_name)
+      fstabs = get_fstabs(r['name'])
 
       props = get_jail_properties(r['name'])
       props -= default_props
