@@ -41,7 +41,7 @@ Puppet::Type.newtype(:jail_template) do
     # overridden so that we match with self.should
     def insync?(is)
       is = [] if !is || is == :absent
-      is.sort == self.should.sort
+      is.sort == should.sort
     end
   end
 
@@ -61,11 +61,11 @@ Puppet::Type.newtype(:jail_template) do
 
     munge do |fs|
       # convert string to keys
-      fs = Hash[fs.map { |k,v| [k.to_sym, v] }]
+      fs = Hash[fs.map { |k, v| [k.to_sym, v] }]
       # remove defaults
-      fs.delete(:type) if fs[:type] == "nullfs"
+      fs.delete(:type) if fs[:type] == 'nullfs'
       fs.delete(:dst) if fs[:dst] =~ %r{#{fs[:src]}$}
-      fs.delete(:rw) if [:false, "false", false].include? fs[:rw]
+      fs.delete(:rw) if [:false, 'false', false].include? fs[:rw]
       fs
     end
 
@@ -78,7 +78,7 @@ Puppet::Type.newtype(:jail_template) do
     def insync?(is)
       # order in these arrays is kinda important, and ruby's Hash.== compares
       # hashes structurally, so we should be set here:
-      is == self.should
+      is == should
     end
   end
 
@@ -114,7 +114,7 @@ Puppet::Type.newtype(:jail_template) do
   end
 
   newproperty(:rlimits) do
-    desc<<-EOM
+    desc <<-EOM
       A Hash of rlimits for this jail
 
       Example:
@@ -130,7 +130,7 @@ Puppet::Type.newtype(:jail_template) do
 
   validate do
     if self[:pkglist] && !(self[:ip4_addr] || self[:ip6_addr])
-      raise ArgumentError, "a Network setup is required for installing packages. Please set ip4_addr or ip6_addr!"
+      raise ArgumentError, 'a Network setup is required for installing packages. Please set ip4_addr or ip6_addr!'
     end
   end
 

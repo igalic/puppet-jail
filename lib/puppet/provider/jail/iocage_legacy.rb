@@ -43,14 +43,14 @@ Puppet::Type.type(:jail).provide(:iocage_legacy) do
     [jail_list, jail_list('-t')].each.map do |j|
       all_properties = get_jail_properties(j[:tag])
 
-      jensure = all_properties['template'] == 'yes' ? :template : :present
+      jensure = (all_properties['template'] == 'yes') ? :template : :present
 
       jail_properties = {
         provider: :iocage_legacy,
         ensure: jensure,
         name: j[:tag],
         state: j[:state],
-        boot: j[:boot]
+        boot: j[:boot],
       }
 
       jail_properties[:jid] = j[:jid] if j[:jid] != '-'
@@ -65,7 +65,7 @@ Puppet::Type.type(:jail).provide(:iocage_legacy) do
         :release,
         :rlimits,
         :jail_zfs,
-        :jail_zfs_dataset
+        :jail_zfs_dataset,
       ]
 
       extra_properties.each do |p|
@@ -185,7 +185,7 @@ Puppet::Type.type(:jail).provide(:iocage_legacy) do
         :release,
         :rlimits,
         :jail_zfs,
-        :jail_zfs_dataset
+        :jail_zfs_dataset,
       ]
 
       unless resource[:pkglist].empty?

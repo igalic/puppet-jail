@@ -4,31 +4,39 @@ dist: trusty
 language: ruby
 cache: bundler
 before_install:
+  - bundle -v
   - rm -f Gemfile.lock
+  - gem update --system
+  - gem update bundler
+  - gem --version
+  - bundle -v
 script:
   - 'bundle exec rake $CHECK'
+bundler_args: --without system_tests
+rvm:
+  - 2.4.1
+env:
+  - PUPPET_GEM_VERSION="~> 5.0" CHECK=spec
 matrix:
   fast_finish: true
   include:
-  - rvm: 2.1.9
-    bundler_args: --without system_tests development release
-    env: PUPPET_VERSION="~> 4.0" CHECK=test PARALLEL_TEST_PROCESSORS=12
-  - rvm: 2.4.3
-    bundler_args: --without system_tests development release
-    env: PUPPET_VERSION="~> 5.0" CHECK=test_with_coveralls
-  - rvm: 2.5.0
-    bundler_args: --without system_tests development release
-    env: PUPPET_VERSION="~> 5.0" CHECK=test_with_coveralls
-  - rvm: 2.4.3
-    bundler_args: --without system_tests development release
-    env: PUPPET_VERSION="~> 5.0" CHECK=rubocop
-  - rvm: 2.4.3
-    bundler_args: --without system_tests development release
-    env: PUPPET_VERSION="~> 5.0" CHECK=build
+    -
+      env: CHECK=rubocop
+    -
+      env: CHECK="syntax lint"
+    -
+      env: CHECK=metadata_lint
+    -
+      env: CHECK=release_checks
+    -
+      env: CHECK=spec
+    -
+      env: PUPPET_GEM_VERSION="~> 4.0" CHECK=spec
+      rvm: 2.1.9
 branches:
   only:
-  - master
-  - /^v\d/
+    - master
+    - /^v\d/
 notifications:
   email: false
   irc:

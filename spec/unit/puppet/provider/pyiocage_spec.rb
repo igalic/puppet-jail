@@ -8,7 +8,7 @@ exec_props = { override_locale: false, failonfail: true, combine: true }
 
 describe provider_class do
   context '#jail_list' do
-    before do
+    before(:each) do
       fixture_jails  = File.read('spec/fixtures/pyiocage_list-l')
       fixture_tmpl   = File.read('spec/fixtures/pyiocage_list-t')
       # provider_class.stub(:iocage).with(['list']) { fixture }
@@ -77,7 +77,7 @@ describe provider_class do
   end
 
   context '#get_jail_properties' do
-    before do
+    before(:each) do
       list_fixture = File.read('spec/fixtures/pyiocage_list')
       allow(provider_class).to receive(cmd).with(['list']) { list_fixture }
 
@@ -90,13 +90,13 @@ describe provider_class do
 
       expect(results).to(include(
                            'openfiles' => 'off',
-                           'memoryuse' => '8G:log'
+                           'memoryuse' => '8G:log',
       ))
     end
   end
 
   context '#empty jail_list' do
-    before do
+    before(:each) do
       provider_class.stubs(:iocage).with('list', '-Htl').returns ''
       provider_class.stubs(:iocage).with('list', '-Hl').returns ''
     end
@@ -106,7 +106,7 @@ describe provider_class do
   end
 
   context '#fstab' do
-    before do
+    before(:each) do
       provider_class.stubs(:iocage).with('fstab', '-Hl', 'cyhr').returns <<-EOT
 0       /usr/local/etc/puppet /iocage/jails/cyhr/root/usr/local/etc/puppet nullfs ro 0 0
 1       /data/www/cyhr /iocage/jails/cyhr/root/usr/local/www nullfs ro 0 0

@@ -74,7 +74,7 @@ Puppet::Type.newtype(:jail) do
   end
 
   newproperty(:fstabs) do
-    desc<<-EOM
+    desc <<-EOM
         An array of Hashes of directories to mount' of properties for this jail
 
         `src` is the path on the host. the optional `dst` is the destination
@@ -95,10 +95,17 @@ Puppet::Type.newtype(:jail) do
   end
 
   newproperty(:rlimits) do
-    desc<<-EOM
+    desc <<-EOM
       A Hash of rlimits for this jail
 
-      Please see rctl(8) for a complete documentation
+      Example:
+        jail { xforkb:
+           ensure => present,
+          rlimits => { nproc => {action => deny, amount => 50}}
+        }
+
+      This creates a jail that makes it impossible to fork-bomb, since we
+      will not allow to spawn more than 50 processes (nproc)
      EOM
   end
 

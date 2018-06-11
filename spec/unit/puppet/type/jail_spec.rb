@@ -17,7 +17,7 @@ describe type_class do
       :user_data,
       :pkglist,
       :allow_rebuild,
-      :allow_restart
+      :allow_restart,
     ]
   end
 
@@ -32,7 +32,7 @@ describe type_class do
       :type,
       :template,
       :fstab,
-      :properties
+      :properties,
     ]
   end
 

@@ -28,37 +28,39 @@ module PuppetX::Zleslie::Helper
   end
 
   def get_fstab(jail_name)
-      fstab = ioc('fstab', 'show', jail_name)
-      fstabs = fstab.split("\n").map do |l|
-        next if l =~ %r{^$|^#}
-        src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
-        raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
-        rw = !(opts =~ %r{\brw\b}).nil?
+    fstab = ioc('fstab', 'show', jail_name)
+    fstabs = fstab.split("\n").map do |l|
+      next if l =~ %r{^$|^#}
+      src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
+      raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
+      rw = !(opts =~ %r{\brw\b}).nil?
 
-        fs = { src: src, dst: dst, type: type, rw: rw }
-        # apparently, munge is not ran after self.instances,
-        # so we have to do repeat this:
-        fs.delete(:type) if fs[:type] == "nullfs"
-        fs.delete(:dst) if fs[:dst] =~ %r{#{fs[:src]}$}
-        fs.delete(:rw) if [:false, "false", false].include? fs[:rw]
-        fs
-      end.compact
-      fstabs
+      fs = { src: src, dst: dst, type: type, rw: rw }
+      # apparently, munge is not ran after self.instances,
+      # so we have to do repeat this:
+      fs.delete(:type) if fs[:type] == 'nullfs'
+      fs.delete(:dst) if fs[:dst] =~ %r{#{fs[:src]}$}
+      fs.delete(:rw) if [:false, 'false', false].include? fs[:rw]
+      fs
     end
+    fstabs.compact
+  end
 
-  def get_all_props(jail_name="defaults")
+  def get_all_props(jail_name = 'defaults')
     props = ioc('get', 'all', jail_name).split("\n").map do |p|
-      [k, v] = p.split(':', 2)
-    end.to_h
+      k, v = p.split(':', 2)
+    end
+    props = props.to_h
     # delete all properties we already have as properties or parameters, or
     # which cannot be possibly equal
-    props.delete("id")
-    props.delete("ip4_addr")
-    props.delete("ip6_addr")
-    props.delete("rlimits")
-    props.delete("release")
-    props.delete("user.pkglist")
-    props.delete("user.postscript")
-    props.delete("user.template")
+    props.delete('id')
+    props.delete('ip4_addr')
+    props.delete('ip6_addr')
+    props.delete('rlimits')
+    props.delete('release')
+    props.delete('user.pkglist')
+    props.delete('user.postscript')
+    props.delete('user.template')
     Set.new(props)
+  end
 end

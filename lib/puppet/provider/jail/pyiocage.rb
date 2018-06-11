@@ -42,7 +42,7 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
       jail_data = {}
       values = j.split(%r{\s+})
       values.each_index do |i|
-        jail_data[Fields[i]] = values[i] != '-' ? values[i] : nil
+        jail_data[Fields[i]] = (values[i] != '-') ? values[i] : nil
       end
       data << jail_data
     end
@@ -73,7 +73,7 @@ Puppet::Type.type(:jail).provide(:pyiocage) do
         release: j[:release],
         ip4_addr: j[:ip4_addr],
         ip6_addr: j[:ip6_addr],
-        template: j[:template]
+        template: j[:template],
       }
 
       all_properties = get_jail_properties(j[:uuid])

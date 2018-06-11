@@ -2,7 +2,7 @@
 # FreeBSD base for different releases.
 
 Puppet::Type.newtype(:jail_release) do
-  @doc = "This type is meant to facilitate the deployment of FreeBSD jails by fetching a FreeBSD base for different releases."
+  @doc = 'This type is meant to facilitate the deployment of FreeBSD jails by fetching a FreeBSD base for different releases.'
 
   ensurable
 

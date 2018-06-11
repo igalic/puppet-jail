@@ -27,15 +27,15 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def self.instances
-    default_props = get_all_props("defaults")
+    default_props = get_all_props('defaults')
 
     jails = JSON.parse(ioc('list', '--output-format=json',
-       '--output=name,release,ip4_addr,ip6_addr,rlimits,user.template'))
+                           '--output=name,release,ip4_addr,ip6_addr,rlimits,user.template'))
     jails.map do |r|
       fstabs = get_fstabs(r['name'])
 
       props = get_jail_properties(r['name'])
-      props = props - default_props
+      props -= default_props
 
       new(
         ensure: :present,
@@ -61,7 +61,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     ip6_addr = "ip6_addr='#{resource[:ip6_addr]}'" if resource[:ip6_addr]
 
     ioc('create', '--release', resource[:release], '--basejail', '--name',
-      resource[:name], ip4_addr, ip6_addr)
+        resource[:name], ip4_addr, ip6_addr)
     resource[:ensure] = :present
   end
 
@@ -90,8 +90,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     if @property_flush[:fstab]
-      desired_fstab = Array(resource[:fstab] == :absent ? [] : resource[:fstab])
-      current_fstab = Array(fstab == :absent ? [] : fstab)
+      desired_fstab = Array((resource[:fstab] == :absent) ? [] : resource[:fstab])
+      current_fstab = Array((fstab == :absent) ? [] : fstab)
       (current_fstab - desired_fstab).each do |f|
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'rm', rw, f[:src], resource[:name])
