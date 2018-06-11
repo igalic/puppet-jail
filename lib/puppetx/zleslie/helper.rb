@@ -30,7 +30,8 @@ module PuppetX::Zleslie::Helper
   def get_fstabs(jail_name)
     fstab = ioc('fstab', 'show', jail_name)
     fstabs = fstab.split("\n").map do |l|
-      next if l =~ %r{^$|^#}
+      next if l =~ %r{^\s*$|^\s*#}
+      next if l =~ %r{# iocage-auto\s*$}
       src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
       raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
       rw = !(opts =~ %r{\brw\b}).nil?
