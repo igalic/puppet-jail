@@ -70,7 +70,7 @@ Puppet::Type.newtype(:jail_template) do
     end
 
     validate do |fs|
-      wrong = fs.keys - %w[src dst type rw]
+      wrong = fs.keys - ['src', 'dst', 'type', 'rw']
       raise ArgumentError, "Invalid keys supplied for fstab: #{wrong}" unless wrong.empty?
     end
 

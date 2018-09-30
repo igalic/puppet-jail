@@ -8,6 +8,47 @@ module PuppetX::Zleslie::Helper
     Puppet::Util::Execution.execute(cmd, override_locale: false, failonfail: true, combine: true)
   end
 
+  @TYPE_PARAMS = [
+    'id',
+    'ip4_addr',
+    'ip6_addr',
+    'rlimits',
+    'release',
+    'template',
+    'user.pkglist',
+    'user.postscript',
+    'user.template',
+  ]
+
+  @RCTL = [
+    # env MANWIDTH=300 man rctl | grep -A25 '^R.*E.*S.*O' | tail -24 |\
+    # awk  '{print "\'" $1 "\',"}'
+    'datasize',
+    'stacksize',
+    'coredumpsize',
+    'memoryuse',
+    'memorylocked',
+    'maxproc',
+    'openfiles',
+    'vmemoryuse',
+    'pseudoterminals',
+    'swapuse',
+    'nthr',
+    'msgqqueued',
+    'msgqsize',
+    'nmsgq',
+    'nsem',
+    'nsemop',
+    'nshm',
+    'shmsize',
+    'wallclock',
+    'pcpu',
+    'readbps',
+    'writebps',
+    'readiops',
+    'writeiops',
+  ]
+
   def get_ioc_json_array(arg)
     return nil if arg == '-'
     return nil if arg == 'None'
@@ -54,16 +95,13 @@ module PuppetX::Zleslie::Helper
     props = props.to_h
     # delete all properties we already have as properties or parameters, or
     # which cannot be possibly equal
-    props.delete('id')
-    props.delete('ip4_addr')
-    props.delete('ip6_addr')
-    props.delete('rlimits')
-    props.delete('release')
-    props.delete('template')
-    props.delete('user.pkglist')
-    props.delete('user.postscript')
-    props.delete('user.template')
+    props.delete_if { |k, _v| @TYPE_PARAMS.include? k }
+
+    # "temporary" hack
     props['jail_zfs_dataset'] = '-' if props['jail_zfs_dataset'] == 'None'
+
+    # delete all rlimits, until we have a better way to get them:
+    props.delete_if { |k, _v| @RCTL.include? k }
     Set.new(props)
   end
 end

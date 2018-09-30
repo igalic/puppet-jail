@@ -108,12 +108,12 @@ describe provider_class do
   context '#fstab' do
     before(:each) do
       provider_class.stubs(:iocage).with('fstab', '-Hl', 'cyhr').returns <<-EOT
-0       /usr/local/etc/puppet /iocage/jails/cyhr/root/usr/local/etc/puppet nullfs ro 0 0
-1       /data/www/cyhr /iocage/jails/cyhr/root/usr/local/www nullfs ro 0 0
+        0       /usr/local/etc/puppet /iocage/jails/cyhr/root/usr/local/etc/puppet nullfs ro 0 0
+        1       /data/www/cyhr /iocage/jails/cyhr/root/usr/local/www nullfs ro 0 0
       EOT
       provider_class.stubs(:iocage).with('list', '-Htl').returns ''
       provider_class.stubs(:iocage).with('list', '-Hl').returns <<-EOT
-19      cyhr    off     up      jail    11.0-RELEASE-p10        vtnet0|172.16.1.3/12    -       f11-php71
+        19      cyhr    off     up      jail    11.0-RELEASE-p10        vtnet0|172.16.1.3/12    -       f11-php71
       EOT
 
       # we don't care about properties
