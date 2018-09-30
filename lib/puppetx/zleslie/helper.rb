@@ -21,8 +21,9 @@ module PuppetX::Zleslie::Helper
   ]
 
   @RCTL = [
-    # env MANWIDTH=300 man rctl | grep -A25 '^R.*E.*S.*O' | tail -24 |\
+    # env MANWIDTH=300 man rctl | grep -A25 '^R.*E.*S.*O' | tail -25 |\
     # awk  '{print "\'" $1 "\',"}'
+    'cputime',
     'datasize',
     'stacksize',
     'coredumpsize',
