@@ -8,7 +8,7 @@ module PuppetX::Zleslie::Helper
     Puppet::Util::Execution.execute(cmd, override_locale: false, failonfail: true, combine: true)
   end
 
-  @TYPE_PARAMS = [
+  TYPE_PARAMS = [
     'id',
     'ip4_addr',
     'ip6_addr',
@@ -20,7 +20,7 @@ module PuppetX::Zleslie::Helper
     'user.template',
   ]
 
-  @RCTL = [
+  RCTL = [
     # env MANWIDTH=300 man rctl | grep -A25 '^R.*E.*S.*O' | tail -25 |\
     # awk  '{print "\'" $1 "\',"}'
     'cputime',
@@ -96,13 +96,13 @@ module PuppetX::Zleslie::Helper
     props = props.to_h
     # delete all properties we already have as properties or parameters, or
     # which cannot be possibly equal
-    props.delete_if { |k, _v| @TYPE_PARAMS.include? k }
+    props.delete_if { |k, _v| TYPE_PARAMS.include? k }
 
     # "temporary" hack
     props['jail_zfs_dataset'] = '-' if props['jail_zfs_dataset'] == 'None'
 
     # delete all rlimits, until we have a better way to get them:
-    props.delete_if { |k, _v| @RCTL.include? k }
+    props.delete_if { |k, _v| RCTL.include? k }
     Set.new(props)
   end
 end
