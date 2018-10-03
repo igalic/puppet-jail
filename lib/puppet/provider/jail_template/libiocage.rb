@@ -66,13 +66,11 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
 
   def create
     ioc('create', '--release', resource[:release], '--name', resource[:name])
-      if resource[:pkglist]
-        ioc('pkg', resource[:name], resource[:pkglist].join(' '))
-        ioc('set', 'user.pkglist="' + resource[:pkglist].join(',') + '"', resource[:name])
-      end
-
-      ioc('stop', resource[:name])
+    if resource[:pkglist]
+      ioc('pkg', resource[:name], resource[:pkglist].join(' '))
+      ioc('set', 'user.pkglist="' + resource[:pkglist].join(',') + '"', resource[:name])
     end
+
     # the last action is to set template=yes
     ioc('set', 'template=yes', resource[:name])
     @property_hash = @property_flush

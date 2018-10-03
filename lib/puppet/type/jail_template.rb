@@ -25,7 +25,7 @@ Puppet::Type.newtype(:jail_template) do
     attr_reader :should
 
     munge do |x|
-        x.split(',') if x.is_a?(String)
+      x.split(',') if x.is_a?(String)
     end
 
     # overridden so that we match with self.should
