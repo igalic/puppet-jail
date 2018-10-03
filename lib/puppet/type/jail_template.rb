@@ -24,7 +24,7 @@ Puppet::Type.newtype(:jail_template) do
 
     attr_reader :should
 
-    def munge |x|
+    munge do |x|
         x.split(',') if x.is_a?(String)
     end
 
