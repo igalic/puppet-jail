@@ -90,6 +90,22 @@ Puppet::Type.newtype(:jail) do
       EOM
   end
 
+  newproperty(:pkglist, array_matching: :all) do
+    desc 'A list of packages to be installed'
+
+    attr_reader :should
+
+    def munge |x|
+        x.split(',') if x.is_a?(String)
+    end
+
+    # overridden so that we match with self.should
+    def insync?(is)
+      is = [] if !is || is == :absent
+      is.sort == should.sort
+    end
+  end
+
   newproperty(:props) do
     desc 'A Hash of properties for this jail'
   end
