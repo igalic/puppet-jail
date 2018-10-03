@@ -98,7 +98,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
   def pkglist=(value)
     value = [] if value.nil?
-    @property_flush[:pkglist] = value.compact
+    @property_flush[:pkglist] = value.flatten
   end
 
   def destroy
@@ -114,13 +114,13 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     if @property_flush[:pkglist]
-      desired_pkglist = Array((resource[:pkglist] == :absent) ? [] : resource[:pkglist])
+      desired_pkglist = Array((resource[:pkglist] == :absent) ? [] : @property_flush[:pkglist])
       current_pkglist = Array((pkglist == :absent) ? [] : pkglist)
       remove_pkgs = (current_pkglist - desired_pkglist)
-      ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) if remove_pkgs
+      ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) unless remove_pkgs.empty?
 
       install_pkgs = (desired_pkglist - current_pkglist)
-      ioc('pkg', resource[:name], install_pkgs.join(' ')) if install_pkgs
+      ioc('pkg', resource[:name], install_pkgs.join(' ')) unless install_pkgs.empty?
 
       ioc('set', 'user.pkglist="' + desired_pkglist.join(',') + '"', resource[:name])
     end
