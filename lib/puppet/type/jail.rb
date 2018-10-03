@@ -102,7 +102,7 @@ Puppet::Type.newtype(:jail) do
     # overridden so that we match with self.should
     def insync?(is)
       is = [] if !is || is == :absent
-      is.sort == should.sort
+      is.compact.sort == should.compact.sort
     end
   end
 

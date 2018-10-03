@@ -97,7 +97,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def pkglist=(value)
-    @property_flush[:pkglist] = value
+    value = [] if value.nil?
+    @property_flush[:pkglist] = value.compact
   end
 
   def destroy
