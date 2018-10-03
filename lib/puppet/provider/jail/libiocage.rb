@@ -73,7 +73,13 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     ip4_addr = "ip4_addr='#{resource[:ip4_addr]}'" if resource[:ip4_addr]
     ip6_addr = "ip6_addr='#{resource[:ip6_addr]}'" if resource[:ip6_addr]
 
-    ioc('create', '--release', resource[:release], '--basejail', '--name',
+    from = if resource[:release]
+             '--release=#{resource[:release]}'
+           else
+             '--template=#{resource[:template]}'
+           end
+
+    ioc('create', from, '--basejail', '--name',
         resource[:name], ip4_addr, ip6_addr)
     resource[:ensure] = :present
   end
