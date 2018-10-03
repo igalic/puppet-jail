@@ -115,4 +115,16 @@ module PuppetX::Zleslie::Helper
 
     [Set.new(props), Set.new(rlimits)]
   end
+
+  def array_diff(is, should)
+    # normalize should & is:
+    desired = Array((should == :absent) ? [] : is.flatten.compact)
+    current = Array((is == :absent) ? [] : is.flatten.compact)
+
+    # calculate diffs:
+    remove = (current - desired)
+    add = (desired - current)
+
+    [remove, add]
+  end
 end

@@ -114,26 +114,23 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     if @property_flush[:pkglist]
-      desired_pkglist = Array((resource[:pkglist] == :absent) ? [] : @property_flush[:pkglist])
-      current_pkglist = Array((pkglist == :absent) ? [] : pkglist)
-      remove_pkgs = (current_pkglist - desired_pkglist)
-      ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) unless remove_pkgs.empty?
+      remove_pkgs, install_pkgs = array_diff(resource[:pkglist], @property_flush[:pkglist])
 
-      install_pkgs = (desired_pkglist - current_pkglist)
+      ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) unless remove_pkgs.empty?
       ioc('pkg', resource[:name], install_pkgs.join(' ')) unless install_pkgs.empty?
 
       ioc('set', 'user.pkglist="' + desired_pkglist.join(',') + '"', resource[:name])
     end
 
     if @property_flush[:fstabs]
-      desired_fstabs = Array((resource[:fstabs] == :absent) ? [] : resource[:fstabs])
-      current_fstabs = Array((fstabs == :absent) ? [] : fstabs)
-      (current_fstabs - desired_fstabs).each do |f|
+      remove_fstabs, add_fstabs = array_diff(resource[:fstabs], @property_flush[:fstabs])
+
+      remove_fstabs.each do |f|
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'rm', rw, f[:src], resource[:name])
       end
 
-      (desired_fstabs - current_fstabs).each do |f|
+      add_fstabs.each do |f|
         rw = nil
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])
