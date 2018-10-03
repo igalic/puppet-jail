@@ -18,7 +18,7 @@ module PuppetX::Zleslie::Helper
     'user.pkglist',
     'user.postscript',
     'user.template',
-  ]
+  ].freeze
 
   RCTL = [
     # env MANWIDTH=300 man rctl | grep -A25 '^R.*E.*S.*O' | tail -25 |\
@@ -48,7 +48,7 @@ module PuppetX::Zleslie::Helper
     'writebps',
     'readiops',
     'writeiops',
-  ]
+  ].freeze
 
   def get_ioc_json_array(arg)
     return nil if arg == '-'
@@ -91,7 +91,7 @@ module PuppetX::Zleslie::Helper
 
   def get_all_props(jail_name = 'defaults')
     props = ioc('get', 'all', jail_name).split("\n").map do |p|
-      k, v = p.split(':', 2)
+      _k, _v = p.split(':', 2)
     end
     props = props.to_h
     # delete all properties we already have as properties or parameters, or
@@ -101,8 +101,17 @@ module PuppetX::Zleslie::Helper
     # "temporary" hack
     props['jail_zfs_dataset'] = '-' if props['jail_zfs_dataset'] == 'None'
 
-    # delete all rlimits, until we have a better way to get them:
-    props.delete_if { |k, _v| RCTL.include? k }
-    Set.new(props)
+    # put all rlimits into a different hash
+    rlimits = {}
+    props.delete_if do |k, v|
+      if RCTL.include? k
+        rlimits[k] = v
+        true
+      else
+        false
+      end
+    end
+
+    [Set.new(props), Set.new(rlimits)]
   end
 end

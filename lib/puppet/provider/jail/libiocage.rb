@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'puppetx/zleslie/helper'
 
 Puppet::Type.type(:jail).provide(:libiocage) do
@@ -27,15 +29,23 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def self.instances
-    default_props = get_all_props('defaults')
+    default_props, default_rlimits = get_all_props('defaults')
 
     jails = JSON.parse(ioc('list', '--output-format=json',
                            '--output=name,release,ip4_addr,ip6_addr,rlimits,user.template'))
     jails.map do |r|
       fstabs = get_fstabs(r['name'])
 
-      props = get_all_props(r['name'])
+      props, rlimits = get_all_props(r['name'])
       props -= default_props
+      props -= { # these are defaults which are… different
+        'basejail' => 'yes',
+        'host_domainname' => 'local',
+        'host_hostname' => r['name'],
+        'host_hostuuid' => r['name'],
+      }
+
+      rlimits -= default_rlimits
 
       new(
         ensure: :present,
@@ -44,7 +54,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         template: get_ioc_json_string(r['user.template']),
         ip4_addr: get_ioc_json_string(r['ip4_addr']),
         ip6_addr: get_ioc_json_string(r['ip6_addr']),
-        rlimits: get_ioc_json_string(r['rlimits']),
+        rlimits: rlimits.to_h,
         fstab: fstabs,
         props: props.to_h,
       )
