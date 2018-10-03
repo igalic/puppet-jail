@@ -32,10 +32,9 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     default_props, default_rlimits = get_all_props('defaults')
 
     templates = JSON.parse(ioc('list', '--template', '--output-format=json',
-                               '--output=name,release,rlimits,user.pkglist,user.postscript'))
+                               '--output=name,release,rlimits,user.pkglist'))
     templates.map do |r|
       pkglist = get_ioc_json_array(r['user.pkglist'])
-      postscript = get_ioc_json_array(r['user.postscript'])
 
       fstabs = get_fstabs(r['name'])
 
@@ -54,7 +53,6 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
         ensure: :present,
         release: r['release'],
         pkglist: pkglist,
-        postscript: postscript,
         rlimits: rlimits.to_h,
         fstabs: fstabs,
         props: props.to_h,
@@ -71,13 +69,6 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
       if resource[:pkglist]
         ioc('pkg', resource[:name], resource[:pkglist].join(' '))
         ioc('set', 'user.pkglist="' + resource[:pkglist].join(',') + '"', resource[:name])
-      end
-
-      if resource[:postscript]
-        # we'll need to start the jail for this to work
-        ioc('start', resource[:name])
-        ioc('exec', resource[:name], resource[:postscript].join(';'))
-        ioc('set', 'user.pkglist="' + resource[:postscript].join(',') +'"', resource[:name])
       end
 
       ioc('stop', resource[:name])
@@ -109,8 +100,8 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def flush
-    # the only way to update release, pkglist, or postscript is to recreate
-    if @property_flush[:release] || @property_flush[:postscript]
+    # the only way to update release is to recreate
+    if @property_flush[:release]
       destroy
       create
     end

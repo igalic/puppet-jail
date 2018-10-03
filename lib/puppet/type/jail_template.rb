@@ -5,11 +5,9 @@ Puppet::Type.newtype(:jail_template) do
     This type is meant to facilitate the deployment of FreeBSD jails by helping
     create templates.
 
-    It does so using a mix of `pkglist` and `postscript`. Both parameters will
+    It does so using a mix of `pkglist`. This parameters will
     be stored in the template's configuration, so it can be (re)discovered
     through `puppet resource jail_template`.
-
-    Note that this is a crutch until `ioc` supports `provisioning`.
   EOT
   ensurable
 
@@ -23,18 +21,6 @@ Puppet::Type.newtype(:jail_template) do
 
   newproperty(:pkglist, array_matching: :all) do
     desc 'A list of packages to be installed'
-
-    attr_reader :should
-
-    # overridden so that we match with self.should
-    def insync?(is)
-      is = [] if !is || is == :absent
-      is.sort == should.sort
-    end
-  end
-
-  newproperty(:postscript, array_matching: :all) do
-    desc 'A script (one line per entry) to execute after (optionally) installing packages.'
 
     attr_reader :should
 

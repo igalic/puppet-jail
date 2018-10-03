@@ -106,8 +106,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def flush
-    # the only way to update release, pkglist, or postscript is to recreate
-    if @property_flush[:release] || @property_flush[:postscript]
+    # the only way to update release or template, is to recreate
+    if @property_flush[:release] || @property_flush[:template]
       destroy
       create
     end

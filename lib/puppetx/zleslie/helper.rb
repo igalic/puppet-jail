@@ -16,7 +16,6 @@ module PuppetX::Zleslie::Helper
     'release',
     'template',
     'user.pkglist',
-    'user.postscript',
     'user.template',
   ].freeze
 
