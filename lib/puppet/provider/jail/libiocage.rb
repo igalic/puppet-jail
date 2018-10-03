@@ -119,7 +119,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) unless remove_pkgs.empty?
       ioc('pkg', resource[:name], install_pkgs.join(' ')) unless install_pkgs.empty?
 
-      ioc('set', 'user.pkglist="' + desired_pkglist.join(',') + '"', resource[:name])
+      ioc('set', 'user.pkglist="' + @property_flush[:pkglist].flatten.compact.join(',') + '"', resource[:name])
     end
 
     if @property_flush[:fstabs]
