@@ -55,7 +55,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         ip4_addr: get_ioc_json_string(r['ip4_addr']),
         ip6_addr: get_ioc_json_string(r['ip6_addr']),
         rlimits: rlimits.to_h,
-        fstab: fstabs,
+        fstabs: fstabs,
         props: props.to_h,
       )
     end
@@ -87,6 +87,10 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     @property_flush[:fstab] = value
   end
 
+  def pkglist=(value)
+    @property_flush[:pkglist] = value
+  end
+
   def destroy
     ioc('destroy', '--force', resource[:name])
     resource[:ensure] = :absent
@@ -94,20 +98,32 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
   def flush
     # the only way to update release, pkglist, or postscript is to recreate
-    if @property_flush[:release] || @property_flush[:pkglist] || @property_flush[:postscript]
+    if @property_flush[:release] || @property_flush[:postscript]
       destroy
       create
     end
 
-    if @property_flush[:fstab]
-      desired_fstab = Array((resource[:fstab] == :absent) ? [] : resource[:fstab])
-      current_fstab = Array((fstab == :absent) ? [] : fstab)
-      (current_fstab - desired_fstab).each do |f|
+    if @property_flush[:pkglist]
+      desired_pkglist = Array((resource[:pkglist] == :absent) ? [] : resource[:pkglist])
+      current_pkglist = Array((pkglist == :absent) ? [] : pkglist)
+      remove_pkgs = (current_pkglist - desired_pkglist)
+      ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) if remove_pkgs
+
+      install_pkgs = (desired_pkglist - current_pkglist)
+      ioc('pkg', resource[:name], install_pkgs.join(' ')) if install_pkgs
+
+      ioc('set', 'user.pkglist="' + desired_pkglist.join(',') + '"', resource[:name])
+    end
+
+    if @property_flush[:fstabs]
+      desired_fstabs = Array((resource[:fstabs] == :absent) ? [] : resource[:fstabs])
+      current_fstabs = Array((fstabs == :absent) ? [] : fstabs)
+      (current_fstabs - desired_fstabs).each do |f|
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'rm', rw, f[:src], resource[:name])
       end
 
-      (desired_fstab - current_fstab).each do |f|
+      (desired_fstabs - current_fstabs).each do |f|
         rw = nil
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])

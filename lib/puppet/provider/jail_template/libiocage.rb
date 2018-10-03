@@ -32,7 +32,7 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     default_props, default_rlimits = get_all_props('defaults')
 
     templates = JSON.parse(ioc('list', '--template', '--output-format=json',
-                               '--output=name,release,ip4_addr,ip6_addr,rlimits,user.pkglist,user.postscript'))
+                               '--output=name,release,rlimits,user.pkglist,user.postscript'))
     templates.map do |r|
       pkglist = get_ioc_json_array(r['user.pkglist'])
       postscript = get_ioc_json_array(r['user.postscript'])
@@ -55,10 +55,8 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
         release: r['release'],
         pkglist: pkglist,
         postscript: postscript,
-        ip4_addr: get_ioc_json_string(r['ip4_addr']),
-        ip6_addr: get_ioc_json_string(r['ip6_addr']),
         rlimits: rlimits.to_h,
-        fstab: fstabs,
+        fstabs: fstabs,
         props: props.to_h,
       )
     end
@@ -69,27 +67,19 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
   end
 
   def create
-    ip4_addr = ip6_addr = nil
-    ip4_addr = "ip4_addr='#{resource[:ip4_addr]}'" if resource[:ip4_addr]
-    ip6_addr = "ip6_addr='#{resource[:ip6_addr]}'" if resource[:ip6_addr]
-
-    ioc('create', '--release', resource[:release], '--name', resource[:name], ip4_addr, ip6_addr)
-    if resource[:pkglist] || resource[:postscript]
-      # we'll need to start the jail for this to work
-      ioc('start', resource[:name])
-
+    ioc('create', '--release', resource[:release], '--name', resource[:name])
       if resource[:pkglist]
-        ioc('exec', resource[:name], 'env ASSUME_ALWAYS_YES=YES pkg bootstrap')
-        ioc('exec', resource[:name], 'pkg install -y', resource[:pkglist].join(' '))
-        ioc('set', 'pkglist=' + resource[:pkglist].join(','), resource[:name])
+        ioc('pkg', resource[:name], resource[:pkglist].join(' '))
+        ioc('set', 'user.pkglist="' + resource[:pkglist].join(',') + '"', resource[:name])
       end
 
       if resource[:postscript]
+        # we'll need to start the jail for this to work
+        ioc('start', resource[:name])
         ioc('exec', resource[:name], resource[:postscript].join(';'))
-        ioc('set', 'postscript=' + resource[:postscript].join(','), resource[:name])
+        ioc('set', 'user.pkglist="' + resource[:postscript].join(',') +'"', resource[:name])
       end
 
-      ioc('set', 'ip4_addr=', 'ip6_addr=', resource[:name])
       ioc('stop', resource[:name])
     end
     # the last action is to set template=yes
@@ -109,8 +99,8 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
     @property_flush[:release] = value
   end
 
-  def fstab=(value)
-    @property_flush[:fstab] = value
+  def fstabs=(value)
+    @property_flush[:fstabs] = value
   end
 
   def destroy
@@ -120,20 +110,32 @@ Puppet::Type.type(:jail_template).provide(:libiocage) do
 
   def flush
     # the only way to update release, pkglist, or postscript is to recreate
-    if @property_flush[:release] || @property_flush[:pkglist] || @property_flush[:postscript]
+    if @property_flush[:release] || @property_flush[:postscript]
       destroy
       create
     end
 
-    if @property_flush[:fstab]
-      desired_fstab = Array((resource[:fstab] == :absent) ? [] : resource[:fstab])
-      current_fstab = Array((fstab == :absent) ? [] : fstab)
-      (current_fstab - desired_fstab).each do |f|
+    if @property_flush[:pkglist]
+      desired_pkglist = Array((resource[:pkglist] == :absent) ? [] : resource[:pkglist])
+      current_pkglist = Array((pkglist == :absent) ? [] : pkglist)
+      remove_pkgs = (current_pkglist - desired_pkglist)
+      ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) if remove_pkgs
+
+      install_pkgs = (desired_pkglist - current_pkglist)
+      ioc('pkg', resource[:name], install_pkgs.join(' ')) if install_pkgs
+
+      ioc('set', 'user.pkglist="' + desired_pkglist.join(',') + '"', resource[:name])
+    end
+
+    if @property_flush[:fstabs]
+      desired_fstabs = Array((resource[:fstabs] == :absent) ? [] : resource[:fstabs])
+      current_fstabs = Array((fstabs == :absent) ? [] : fstabs)
+      (current_fstabs - desired_fstabs).each do |f|
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'rm', rw, f[:src], resource[:name])
       end
 
-      (desired_fstab - current_fstab).each do |f|
+      (desired_fstabs - current_fstabs).each do |f|
         rw = nil
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])

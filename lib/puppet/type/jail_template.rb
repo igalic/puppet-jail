@@ -45,7 +45,7 @@ Puppet::Type.newtype(:jail_template) do
     end
   end
 
-  newproperty(:fstab, array_matching: :all) do
+  newproperty(:fstabs, array_matching: :all) do
     desc <<-EOT
     An array of of Hashes describing the fstab entries of the jail.
 
@@ -82,33 +82,6 @@ Puppet::Type.newtype(:jail_template) do
     end
   end
 
-  def self.validate_ip(ip)
-    return true if ip.nil?
-
-    netif, ip_addr = ip.split('|')
-    return false if netif.nil?
-    return false if ip_addr.nil?
-
-    _ = IPAddr.new(ip_addr)
-    return true
-  rescue IPAddr::InvalidAddressError
-    return false
-  end
-
-  newproperty(:ip4_addr) do
-    desc "ip4_addr only used for installing packages. The IPv4 Address or CIDR must be of the form: 'vtnet0|172.16.0.12/12'"
-    validate do |ip|
-      Puppet::Type::Jail_template.validate_ip(ip)
-    end
-  end
-
-  newproperty(:ip6_addr) do
-    desc "ip6_addr only used for installing packages. The IPv6 Address or CIDR must be of the form: 'vtnet0|2001:db8:a0b:12f0::1/64'"
-    validate do |ip|
-      Puppet::Type::Jail_template.validate_ip(ip)
-    end
-  end
-
   newproperty(:props) do
     desc 'A Hash of properties for this jail'
   end
@@ -126,12 +99,6 @@ Puppet::Type.newtype(:jail_template) do
       This creates a jail that makes it impossible to fork-bomb, since we
       will not allow to spawn more than 50 processes (nproc)
      EOM
-  end
-
-  validate do
-    if self[:pkglist] && !(self[:ip4_addr] || self[:ip6_addr])
-      raise ArgumentError, 'a Network setup is required for installing packages. Please set ip4_addr or ip6_addr!'
-    end
   end
 
   autorequire(:jail_release) do
