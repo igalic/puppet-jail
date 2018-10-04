@@ -9,13 +9,13 @@ module PuppetX::Zleslie::Helper
   end
 
   def struct_from_hash(name, data)
-    keys = data.keys.map{ |x| x.to_sym }
+    keys = data.keys.map { |x| x.to_sym }
     Struct.new(name, *keys)
   end
 
   def hash2struct(klass, data)
-    keys = data.keys.map{ |x| x.to_sym }
-    s = klass.new()
+    keys = data.keys.map { |x| x.to_sym }
+    s = klass.new
     keys.each do |k|
       s[k.to_s] = data[k.to_s]
     end
