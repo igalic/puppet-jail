@@ -25,7 +25,14 @@ Puppet::Type.newtype(:jail) do
 
   newproperty(:state) do
     desc 'Either running or stopped'
-    newvalues(:up, :down)
+    newvalues(:running, :stopped)
+    munge do |v|
+      if v == 'yes'
+        :running
+      else
+        :stopped
+      end
+    end
   end
 
   newproperty(:release) do

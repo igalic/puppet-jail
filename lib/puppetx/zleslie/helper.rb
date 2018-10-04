@@ -10,8 +10,10 @@ module PuppetX::Zleslie::Helper
 
   TYPE_PARAMS = [
     'id',
+    'boot',
     'ip4_addr',
     'ip6_addr',
+    'running',
     'rlimits',
     'release',
     'template',

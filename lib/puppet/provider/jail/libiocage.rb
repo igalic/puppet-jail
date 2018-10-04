@@ -31,12 +31,16 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   def self.instances
     default_props, default_rlimits = get_all_props('defaults')
 
-    jails = JSON.parse(ioc('list', '--output-format=json',
-                           '--output=name,release,ip4_addr,ip6_addr,rlimits,user.template,user.pkglist'))
+    jails = JSON.parse(
+      ioc('list', '--output-format=json',
+          '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,user.template,user.pkglist'))
     jails.map do |r|
       pkglist = get_ioc_json_array(r['user.pkglist'])
 
       fstabs = get_fstabs(r['name'])
+
+      state = :stopped
+      state = :running if r[:running] == 'yes'
 
       props, rlimits = get_all_props(r['name'])
       props -= default_props
@@ -53,11 +57,13 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         ensure: :present,
         name: r['name'],
         release: r['release'],
+        boot: r['boot'],
         template: get_ioc_json_string(r['user.template']),
         pkglist: pkglist,
         ip4_addr: get_ioc_json_string(r['ip4_addr']),
         ip6_addr: get_ioc_json_string(r['ip6_addr']),
         rlimits: rlimits.to_h,
+        state: r['running'],
         fstabs: fstabs,
         props: props.to_h,
       )
@@ -82,6 +88,17 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     ioc('create', from, '--basejail', '--name',
         resource[:name], ip4_addr, ip6_addr)
     resource[:ensure] = :present
+  end
+
+  def boot=(value)
+    @property_flush[:boot] = value
+  end
+
+  def state=(value)
+    action = 'start' if value.to_sym == :running
+    action = 'stop' if value.to_sym == :stopped
+    ioc(action, resource[:name])
+    resource[:state] = value
   end
 
   def release=(value)
