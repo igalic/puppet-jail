@@ -45,7 +45,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       fstabs = get_fstabs(s['name'])
 
       state = :stopped
-      state = :running if [:running, 'running', :yes, 'yes'].include? s['running']
+      state = :running if s['running'] == 'yes'
 
       props, rlimits = get_all_props(s['name'])
       props -= default_props
@@ -87,8 +87,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     from = "--release=#{resource[:release]}" if resource[:release]
     from = "--template=#{resource[:template]}" if resource[:template]
 
-    boot = nil
-    boot = 'boot=yes' if resource[:boot] == :yes
+    boot = nil if resource[:boot] == :off
+    boot = 'boot=on' if resource[:boot] == :on
 
     props_arr = []
     if props != :absent
