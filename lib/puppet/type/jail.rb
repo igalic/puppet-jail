@@ -27,7 +27,7 @@ Puppet::Type.newtype(:jail) do
     desc 'Either running or stopped'
     newvalues(:running, :stopped)
     munge do |v|
-      if v == 'yes'
+      if ['yes', :yes, 'running', :running].include? v
         :running
       else
         :stopped

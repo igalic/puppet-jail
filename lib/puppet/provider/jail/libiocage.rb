@@ -45,7 +45,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       fstabs = get_fstabs(s['name'])
 
       state = :stopped
-      state = :running if [:yes, 'yes'].include? s['running']
+      state = :running if [:running, "running", :yes, 'yes'].include? s['running']
 
       props, rlimits = get_all_props(s['name'])
       props -= default_props
