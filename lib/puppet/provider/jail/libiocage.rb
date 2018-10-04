@@ -101,8 +101,9 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         from, ip4_addr, ip6_addr, boot, *props_arr)
 
     if !resource[:pkglist].nil? && resource[:pkglist] != :absent
-      ioc('pkg', resource[:name], resource[:pkglist].join(' '))
-      ioc('set', "user.pkglist='" + resource[:pkglist].join(',') + '"', resource[:name])
+      pkglist = resource[:pkglist].flatten
+      ioc('pkg', resource[:name], pkglist.join(' '))
+      ioc('set', "user.pkglist='" + pkglist.join(',') + "'", resource[:name])
     end
 
     if !resource[:fstabs].nil? && resource[:fstabs] != :absent
