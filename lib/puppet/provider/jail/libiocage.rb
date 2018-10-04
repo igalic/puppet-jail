@@ -63,7 +63,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         ip4_addr: get_ioc_json_string(r['ip4_addr']),
         ip6_addr: get_ioc_json_string(r['ip6_addr']),
         rlimits: rlimits.to_h,
-        state: r['running'],
+        state: state,
         fstabs: fstabs,
         props: props.to_h,
       )
