@@ -91,8 +91,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     boot = 'boot=on' if resource[:boot] == :on
 
     props_arr = []
-    if props != :absent
-      props.each do |p, v|
+    if !resource[:props].nil? && resource[:props] != :absent
+      resource[:props].each do |p, v|
         props_arr << "#{p}='#{v}'"
       end
     end
@@ -100,9 +100,12 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     ioc('create', resource[:name],
         from, ip4_addr, ip6_addr, boot, *props_arr)
 
-    ioc('pkg', resource[:name], resource[:pkglist].join(' ')) unless resource[:pkglist] == :absent
+    if !resource[:pkglist].nil? && resource[:pkglist] != :absent
+      ioc('pkg', resource[:name], resource[:pkglist].join(' '))
+      ioc('set', "user.pkglist='" + resource[:pkglist].join(',') + '"', resource[:name])
+    end
 
-    if resource[:fstabs] != :absent
+    if !resource[:fstabs].nil? && resource[:fstabs] != :absent
       resource[:fstabs].each do |f|
         rw = nil
         rw = '-rw' if ['true', :true, true].include? f[:rw]
