@@ -15,11 +15,11 @@ module PuppetX::Zleslie::Helper
 
   def hash2struct(klass, data)
     keys = data.keys.map{ |x| x.to_sym }
-    s_hash = {}
+    s = klass.new()
     keys.each do |k|
-      s_hash[k] = data[k.to_s]
+      s[k.to_s] = data[k.to_s]
     end
-    klass.new(*s_hash)
+    s
   end
 
   TYPE_PARAMS = [
