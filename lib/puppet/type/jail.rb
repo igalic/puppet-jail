@@ -73,7 +73,7 @@ Puppet::Type.newtype(:jail) do
     EOM
   end
 
-  newproperty(:fstabs, array_matching: :all)) do
+  newproperty(:fstabs, array_matching: :all) do
     desc <<-EOM
         An array of Hashes of directories to mount' of properties for this jail
 
