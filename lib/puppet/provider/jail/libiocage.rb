@@ -103,7 +103,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     action = 'start' if value.to_sym == :running
     action = 'stop' if value.to_sym == :stopped
     ioc(action, resource[:name])
-    resource[:state] = value
+    @property_hash[:state] = value
   end
 
   def release=(value)
@@ -158,6 +158,6 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])
       end
     end
-    @property_flush = resource.to_hash
+    @property_hash = resource.to_hash
   end
 end
