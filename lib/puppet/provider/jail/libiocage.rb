@@ -150,6 +150,14 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     @property_flush[:fstab] = value
   end
 
+  def props=(value)
+    @property_flush[:props] = value
+  end
+
+  def rlimits=(value)
+    @property_flush[:rlimits] = value
+  end
+
   def pkglist=(value)
     value = [] if value.nil?
     @property_flush[:pkglist] = value.flatten
