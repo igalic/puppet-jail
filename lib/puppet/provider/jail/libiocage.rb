@@ -84,8 +84,14 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     ip4_addr = "ip4_addr='#{resource[:ip4_addr]}'" if resource[:ip4_addr]
     ip6_addr = "ip6_addr='#{resource[:ip6_addr]}'" if resource[:ip6_addr]
 
-    from = "--release=#{resource[:release]}" if resource[:release]
-    from = "--template=#{resource[:template]}" if resource[:template]
+    from = []
+    if !resource[:release].nil? && resource[:release] != :absent
+      from << "--release=#{resource[:release]}"
+    end
+    if !resource[:template].nil? && resource[:template] != :absent
+      from << "--template=#{resource[:template]}"
+      from << "user.template=#{resource[:template]}"
+    end
 
     boot = nil if resource[:boot] == :off
     boot = 'boot=on' if resource[:boot] == :on
@@ -98,7 +104,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     ioc('create', resource[:name],
-        from, ip4_addr, ip6_addr, boot, *props_arr)
+        *from, ip4_addr, ip6_addr, boot, *props_arr)
 
     if !resource[:pkglist].nil? && resource[:pkglist] != :absent
       pkglist = resource[:pkglist].flatten
