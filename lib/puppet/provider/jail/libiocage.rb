@@ -113,7 +113,9 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     if !resource[:fstabs].nil? && resource[:fstabs] != :absent
+      fstab_klass = Struct.new("Fstab", :src, :dst, :rw )
       resource[:fstabs].each do |f|
+        f = hash2struct(fstab_klass, f);
         rw = nil
         rw = '-rw' if ['true', :true, true].include? f[:rw]
         ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])
