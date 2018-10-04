@@ -99,6 +99,19 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
     ioc('create', resource[:name],
         from, ip4_addr, ip6_addr, boot, *props_arr)
+
+    ioc('pkg', resource[:name], resource[:pkglist].join(' ')) unless resource[:pkglist] == :absent
+
+    if resource[:fstabs] != :absent
+      resource[:fstabs].each do |f|
+        rw = nil
+        rw = '-rw' if ['true', :true, true].include? f[:rw]
+        ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])
+      end
+    end
+
+    ioc('start', resource[:name]) if resource[:state] == :running
+
     resource[:ensure] = :present
   end
 
