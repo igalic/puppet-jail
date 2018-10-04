@@ -94,12 +94,14 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     boot = "boot=yes" if resource[:boot] == :yes
 
     props_arr = []
-    props.each do |p,v|
-      props_arr << "#{p.to_s}='#{v.to_s}'"
+    if props != :absent
+      props.each do |p,v|
+        props_arr << "#{p.to_s}='#{v.to_s}'"
+      end
     end
 
     ioc('create', from, '--basejail', '--name',
-        resource[:name], ip4_addr, ip6_addr)
+        resource[:name], ip4_addr, ip6_addr, boot, *props_arr)
     resource[:ensure] = :present
   end
 
