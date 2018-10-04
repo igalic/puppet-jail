@@ -140,6 +140,10 @@ Puppet::Type.newtype(:jail) do
     end
   end
 
+  validate do
+    raise('Cannot supply both, template and release') if self[:template] && self[:release]
+  end
+
   autorequire(:jail_release) do
     self[:release] if self[:release]
   end

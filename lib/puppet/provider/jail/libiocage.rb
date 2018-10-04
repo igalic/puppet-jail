@@ -45,7 +45,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       fstabs = get_fstabs(s['name'])
 
       state = :stopped
-      state = :running if [:running, "running", :yes, 'yes'].include? s['running']
+      state = :running if [:running, 'running', :yes, 'yes'].include? s['running']
 
       props, rlimits = get_all_props(s['name'])
       props -= default_props
@@ -84,24 +84,21 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     ip4_addr = "ip4_addr='#{resource[:ip4_addr]}'" if resource[:ip4_addr]
     ip6_addr = "ip6_addr='#{resource[:ip6_addr]}'" if resource[:ip6_addr]
 
-    from = if resource[:release]
-             '--release=#{resource[:release]}'
-           else
-             '--template=#{resource[:template]}'
-           end
+    from = "--release=#{resource[:release]}" if resource[:release]
+    from = "--template=#{resource[:template]}" if resource[:template]
 
     boot = nil
-    boot = "boot=yes" if resource[:boot] == :yes
+    boot = 'boot=yes' if resource[:boot] == :yes
 
     props_arr = []
     if props != :absent
-      props.each do |p,v|
-        props_arr << "#{p.to_s}='#{v.to_s}'"
+      props.each do |p, v|
+        props_arr << "#{p}='#{v}'"
       end
     end
 
-    ioc('create', from, '--basejail', '--name',
-        resource[:name], ip4_addr, ip6_addr, boot, *props_arr)
+    ioc('create', resource[:name],
+        from, ip4_addr, ip6_addr, boot, *props_arr)
     resource[:ensure] = :present
   end
 
