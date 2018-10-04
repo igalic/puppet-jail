@@ -8,14 +8,28 @@ module PuppetX::Zleslie::Helper
     Puppet::Util::Execution.execute(cmd, override_locale: false, failonfail: true, combine: true)
   end
 
+  def struct_from_hash(name, data)
+    keys = data.keys.map{ |x| x.to_sym }
+    Struct.new(name, *keys)
+  end
+
+  def hash2struct(klaas, data)
+    keys = data.keys.map{ |x| x.to_sym }
+    s_hash = {}
+    keys.each do |k|
+      s_hash[k] = data[k.to_s]
+    end
+    klass.new(*s_hash)
+  end
+
   TYPE_PARAMS = [
-    'id',
     'boot',
+    'id',
     'ip4_addr',
     'ip6_addr',
-    'running',
-    'rlimits',
     'release',
+    'rlimits',
+    'running',
     'template',
     'user.pkglist',
     'user.template',
