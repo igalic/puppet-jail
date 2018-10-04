@@ -13,7 +13,7 @@ module PuppetX::Zleslie::Helper
     Struct.new(name, *keys)
   end
 
-  def hash2struct(klaas, data)
+  def hash2struct(klass, data)
     keys = data.keys.map{ |x| x.to_sym }
     s_hash = {}
     keys.each do |k|
