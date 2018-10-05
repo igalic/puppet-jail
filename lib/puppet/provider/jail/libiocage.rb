@@ -93,10 +93,9 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       from << "user.template=#{resource[:template]}"
     end
 
-    boot = nil if resource[:boot] == :off
-    boot = 'boot=on' if resource[:boot] == :on
-
     props_arr = []
+    props_arr << "boot=#{resource[:boot]}"
+
     if !resource[:props].nil? && resource[:props] != :absent
       resource[:props].each do |p, v|
         props_arr << "#{p}='#{v}'"
@@ -104,7 +103,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     ioc('create', resource[:name],
-        *from, ip4_addr, ip6_addr, boot, *props_arr)
+        *from, ip4_addr, ip6_addr, *props_arr)
 
     if !resource[:pkglist].nil? && resource[:pkglist] != :absent
       pkglist = resource[:pkglist].flatten
