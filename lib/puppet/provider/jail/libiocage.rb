@@ -94,7 +94,10 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     props_arr = []
-    props_arr << "boot=#{resource[:boot]}"
+
+    if !resource[:boot].nil? && resource[:boot] != :absent
+      props_arr << "boot=#{resource[:boot]}"
+    end
 
     if !resource[:props].nil? && resource[:props] != :absent
       resource[:props].each do |p, v|
@@ -108,6 +111,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     if !resource[:pkglist].nil? && resource[:pkglist] != :absent
       pkglist = resource[:pkglist].flatten
       ioc('pkg', resource[:name], pkglist.join(' '))
+      # leave this `ioc set` here, because if we fail during `ioc pkg`, we don't
+      # wanna lie in our own tracking about what we've installed
       ioc('set', "user.pkglist='" + pkglist.join(',') + "'", resource[:name])
     end
 
@@ -174,13 +179,26 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       create
     end
 
+    props_arr = []
+    if @property_flush[:props]
+      @property_flush[:props].each do |p, v|
+        props_arr << "#{p}='#{v}'"
+      end
+    end
+
+    if @property_flush[:boot]
+      props_arr << "boot=#{@property_flush[:boot]}"
+    end
+
     if @property_flush[:pkglist]
       remove_pkgs, install_pkgs = array_diff(resource[:pkglist], @property_flush[:pkglist])
 
       ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) unless remove_pkgs.empty?
       ioc('pkg', resource[:name], install_pkgs.join(' ')) unless install_pkgs.empty?
 
-      ioc('set', 'user.pkglist="' + @property_flush[:pkglist].flatten.compact.join(',') + '"', resource[:name])
+      # since package installation happens before setting of props, we can leave
+      # simply push `user.pkglist` onto our props_arr
+      props_arr << 'user.pkglist="' + @property_flush[:pkglist].flatten.compact.join(',') + '"'
     end
 
     if @property_flush[:fstabs]
@@ -197,6 +215,9 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])
       end
     end
+
+    ioc('set', props_arr.join(' '), resource[:name]) unless props_arr.empty?
+
     @property_hash = resource.to_hash
   end
 end
