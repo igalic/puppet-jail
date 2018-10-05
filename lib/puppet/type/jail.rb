@@ -116,7 +116,7 @@ Puppet::Type.newtype(:jail) do
 
       Example:
         jail { xforkb:
-           ensure => present,
+          ensure => present,
           rlimits => { nproc => {action => deny, amount => 50}}
         }
 

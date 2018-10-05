@@ -9,6 +9,8 @@ module PuppetX::Zleslie::Helper
   end
 
   def struct_from_hash(name, data)
+    kernel.get_constant('Struct::' + name)
+  rescue NameError
     keys = data.keys.map { |x| x.to_sym }
     Struct.new(name, *keys)
   end
