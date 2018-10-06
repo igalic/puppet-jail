@@ -130,14 +130,14 @@ module PuppetX::Zleslie::Helper
         elsif !v.include?('=') && !v.include?(':')
           amount = v
           action = 'deny'
-          rlimits[k] = { amount: amount.to_s, action: action,  }
+          rlimits[k] = { 'amount' => amount.to_s, 'action' => action }
         elsif v.include?('=')
           action, rest = v.split('=')
           amount, per = rest.split('/')
-          rlimits[k] = { amount: amount.to_s, action: action, per: per }
+          rlimits[k] = { 'amount' => amount.to_s, 'action' => action, 'per' => per }
         elsif v.include?(':')
           amount, action = v.split(':')
-          rlimits[k] = { amount: amount.to_s, action: action,  }
+          rlimits[k] = { 'amount' => amount.to_s, 'action' => action }
         end
 
         true
