@@ -125,9 +125,9 @@ Puppet::Type.newtype(:jail) do
      EOM
 
     munge do |v|
-      v.each do |v, v|
-        k["amount"] = k["amount"].to_s
-        {v => k}
+      v.each do |k, data|
+        data['amount'] = data['amount'].to_s
+        { k => data }
       end
     end
   end
