@@ -124,22 +124,20 @@ module PuppetX::Zleslie::Helper
     rlimits = {}
     props.delete_if do |k, v|
       if RCTL.include? k
-        per = '/jail'
-        action = amount = nil
+
         if v == '-'
           rlimits[k] = v
         elsif !v.include?('=') && !v.include?(':')
           amount = v
           action = 'deny'
-          rlimits[k] = { amount: amount, action: action, per: per }
+          rlimits[k] = { amount: amount, action: action, per: nil }
         elsif v.include?('=')
           action, rest = v.split('=')
           amount, per = rest.split('/')
-          per = '/jail' if per.nil?
           rlimits[k] = { amount: amount, action: action, per: per }
         elsif v.include?(':')
           amount, action = v.split(':')
-          rlimits[k] = { amount: amount, action: action, per: per }
+          rlimits[k] = { amount: amount, action: action, per: nil }
         end
 
         true
