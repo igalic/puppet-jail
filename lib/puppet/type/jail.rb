@@ -123,6 +123,13 @@ Puppet::Type.newtype(:jail) do
       This creates a jail that makes it impossible to fork-bomb, since we
       will not allow to spawn more than 50 processes (nproc)
      EOM
+
+    munge do |v|
+      v.each do |v, v|
+        k["amount"] = k["amount"].to_s
+        {v => k}
+      end
+    end
   end
 
   def refresh
