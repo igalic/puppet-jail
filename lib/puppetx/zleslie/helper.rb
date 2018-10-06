@@ -138,7 +138,7 @@ module PuppetX::Zleslie::Helper
           per = '/jail' if per.nil?
           rlimits[k] = { amount: amount, action: action, per: per }
         elsif v.include?(':')
-          amount, action = v.split('=')
+          amount, action = v.split(':')
           rlimits[k] = { amount: amount, action: action, per: per }
         end
 
