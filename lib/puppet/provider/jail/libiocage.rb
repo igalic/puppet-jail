@@ -105,6 +105,16 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       end
     end
 
+    if !resource[:rlimits].nil? && resource[:rlimits] != :absent
+      rlimits_klass = Struct.new('Rlimits', :action, :amount, :per)
+      resource[:rlimits].each do |r, limits|
+        limits = hash2struct(rlimits_klass, limits)
+        per = nil
+        per = "/#{limits[:per]}" if limits[:per]
+        props_arr << "#{r}=#{limits[:action]}=#{limits[:amount]}#{limits[:per]}"
+      end
+    end
+
     ioc('create', resource[:name],
         *from, ip4_addr, ip6_addr, *props_arr)
 
