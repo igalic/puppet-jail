@@ -132,12 +132,12 @@ module PuppetX::Zleslie::Helper
           amount = v
           action = 'deny'
           rlimits[k] = { amount: amount, action: action, per: per }
-        elsif !v.include?('=')
+        elsif v.include?('=')
           action, rest = v.split('=')
           amount, per = rest.split('/')
           per = '/jail' if per.nil?
           rlimits[k] = { amount: amount, action: action, per: per }
-        elsif !v.include?(':')
+        elsif v.include?(':')
           amount, action = v.split('=')
           rlimits[k] = { amount: amount, action: action, per: per }
         end
