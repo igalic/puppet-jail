@@ -100,8 +100,8 @@ module PuppetX::Zleslie::Helper
       fs = { 'src' => src, 'dst' => dst, 'type' => type, 'rw' => rw }
       # apparently, munge is not ran after self.instances,
       # so we have to do repeat this:
-      fs.delete('type') if fs[:type] == 'nullfs'
-      fs.delete('dst') if fs[:dst] =~ %r{#{fs['src']}$}
+      fs.delete('type') if fs['type'] == 'nullfs'
+      fs.delete('dst') if fs['dst'] =~ %r{#{fs['src']}$}
       fs.delete('rw') if [:false, 'false', false].include? fs['rw']
       fs
     end
