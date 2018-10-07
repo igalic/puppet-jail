@@ -139,6 +139,11 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     resource[:ensure] = :present
   end
 
+  def restart
+    ioc('stop', '--force', :resource[:name]) if resource[:state] == :running
+    ioc('start', :resource[:name])
+  end
+
   def ip4_addr=(value)
     @property_flush[:ip4_addr] = value
   end

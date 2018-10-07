@@ -133,7 +133,7 @@ Puppet::Type.newtype(:jail) do
   end
 
   def refresh
-    if @parameters[:state] == :up
+    if self[:state] == :running
       provider.restart
     else
       debug 'Skipping restart: jail not running'
