@@ -19,8 +19,8 @@ Puppet::Type.newtype(:jail) do
   end
 
   newproperty(:boot) do
-    desc 'Either on or off'
-    newvalues(:on, :off)
+    desc 'Either yes or no'
+    newvalues(:yes, :no)
   end
 
   newproperty(:state) do
