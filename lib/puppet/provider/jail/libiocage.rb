@@ -139,15 +139,20 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     resource[:ensure] = :present
   end
 
+  def ip4_addr=(value)
+    @property_flush[:ip4_addr] = value
+  end
+
+  def ip6_addr=(value)
+    @property_flush[:ip4_addr] = value
+  end
+
   def boot=(value)
     @property_flush[:boot] = value
   end
 
   def state=(value)
-    action = 'start' if value.to_sym == :running
-    action = 'stop' if value.to_sym == :stopped
-    ioc(action, resource[:name])
-    @property_hash[:state] = value
+    @property_flush[:state] = value
   end
 
   def release=(value)
@@ -198,6 +203,14 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       props_arr << "boot=#{@property_flush[:boot]}"
     end
 
+    if @property_flush[:ip4_addr]
+      props_arr << "ip4_addr='#{@property_flush[:ip4_addr]}'"
+    end
+
+    if @property_flush[:ip6_addr]
+      props_arr << "ip6_addr='#{@property_flush[:ip6_addr]}'"
+    end
+
     if @property_flush[:pkglist]
       remove_pkgs, install_pkgs = array_diff(resource[:pkglist], @property_flush[:pkglist])
 
@@ -225,6 +238,12 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     ioc('set', props_arr.join(' '), resource[:name]) unless props_arr.empty?
+
+    if @property_flush[:state]
+      action = 'start' if @property_flush[:state].to_sym == :running
+      action = 'stop' if @property_flush[:state].to_sym == :stopped
+      ioc(action, resource[:name])
+    end
 
     @property_hash = resource.to_hash
   end
