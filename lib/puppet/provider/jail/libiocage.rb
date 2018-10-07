@@ -140,8 +140,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def restart
-    ioc('stop', '--force', :resource[:name]) if resource[:state] == :running
-    ioc('start', :resource[:name])
+    ioc('stop', '--force', resource[:name]) if resource[:state] == :running
+    ioc('start', resource[:name])
   end
 
   def ip4_addr=(value)
