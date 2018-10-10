@@ -18,13 +18,14 @@ Puppet::Type.newtype(:jail) do
     newvalues(%r{^[a-zA-Z0-9_-]+$})
   end
 
-  newproperty(:boot, :boolean => true, :parent => Puppet::Property::Boolean) do
+  newproperty(:boot, boolean: true, parent: Puppet::Property::Boolean) do
     desc 'Either yes or no'
-    munge do |value|
-      if true
+    munge do |_value|
+      if value == true
         'yes'
       else
         'no'
+      end
     end
   end
 
