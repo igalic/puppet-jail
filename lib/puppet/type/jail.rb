@@ -20,7 +20,7 @@ Puppet::Type.newtype(:jail) do
 
   newproperty(:boot, boolean: true, parent: Puppet::Property::Boolean) do
     desc 'Either yes or no'
-    munge do |_value|
+    munge do |value|
       if value == true
         'yes'
       else
