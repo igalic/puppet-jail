@@ -33,7 +33,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
     jails = JSON.parse(
       ioc('list', '--output-format=json',
-          '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,user.template,user.pkglist'),
+          '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist'),
     )
     jail_klass = struct_from_hash('JailStruct', jails[0])
     jails.map do |r|
@@ -67,6 +67,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         pkglist: pkglist,
         ip4_addr: get_ioc_json_string(s['ip4_addr']),
         ip6_addr: get_ioc_json_string(s['ip6_addr']),
+        depends: s['depends'],
         rlimits: rlimits.to_h,
         state: state,
         fstabs: fstabs,
@@ -97,6 +98,10 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
     if !resource[:boot].nil? && resource[:boot] != :absent
       props_arr << "boot=#{resource[:boot]}"
+    end
+
+    if !resource[:depends].nil? && resource[:depends] != :absent
+      props_arr << "depends='#{resource[:depends]}'"
     end
 
     if !resource[:props].nil? && resource[:props] != :absent
@@ -185,6 +190,10 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     @property_flush[:pkglist] = value.flatten
   end
 
+  def depends=(value)
+    @property_flush[:depends] = value
+  end
+
   def destroy
     ioc('destroy', '--force', resource[:name])
     resource[:ensure] = :absent
@@ -225,6 +234,10 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       # since package installation happens before setting of props, we can leave
       # simply push `user.pkglist` onto our props_arr
       props_arr << 'user.pkglist="' + @property_flush[:pkglist].flatten.compact.join(',') + '"'
+    end
+
+    if !@property_flush[:depends]
+      props_arr << "depends='#{@property_flush[:depends]}'"
     end
 
     if @property_flush[:fstabs]

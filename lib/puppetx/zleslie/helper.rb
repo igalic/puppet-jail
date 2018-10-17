@@ -33,6 +33,7 @@ module PuppetX::Zleslie::Helper
     'rlimits',
     'running',
     'template',
+    'depends',
     'user.pkglist',
     'user.template',
   ].freeze

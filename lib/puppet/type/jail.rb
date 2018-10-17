@@ -106,6 +106,15 @@ Puppet::Type.newtype(:jail) do
     end
   end
 
+  newproperty(:depends) do
+    desc <<-EOM
+      which (if any) jail this jail depends on
+
+      Note that unlike ioc itself, we cannot create any dependencies on anything
+      other than the jail name in puppet, so please only use the name!
+    EOM
+  end
+
   newproperty(:props) do
     desc 'A Hash of properties for this jail'
   end
@@ -150,5 +159,9 @@ Puppet::Type.newtype(:jail) do
 
   autorequire(:jail_template) do
     self[:template] if self[:template]
+  end
+
+  autorequire(:jail) do
+    self[:depends] if self[:depends]
   end
 end
