@@ -236,7 +236,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       props_arr << 'user.pkglist="' + @property_flush[:pkglist].flatten.compact.join(',') + '"'
     end
 
-    if !@property_flush[:depends]
+    if @property_flush[:depends]
       props_arr << "depends='#{@property_flush[:depends]}'"
     end
 
