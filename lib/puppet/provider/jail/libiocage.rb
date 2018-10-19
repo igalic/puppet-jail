@@ -35,7 +35,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       ioc('list', '--output-format=json',
           '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist'),
     )
-    jail_klass = struct_from_hash('JailStruct', jails[0])
+    jail_klass = struct_from_hash('JailStruct', jails[0]) unless jails.empty?
     jails.map do |r|
       s = hash2struct(jail_klass, r)
       r = nil
