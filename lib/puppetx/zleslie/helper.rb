@@ -102,6 +102,8 @@ module PuppetX::Zleslie::Helper
       # so we have to do repeat this:
       fs.delete('type') if fs['type'] == 'nullfs'
       fs.delete('dst') if fs['dst'] =~ %r{#{fs['src']}$}
+      # normalize dst:
+      fs['dst'] = fs['dst'].sub(%r{^/.*/(jails|templates)/#{name}/root(/.*)}, '\2') if fs['dst']
       fs.delete('rw') if [:false, 'false', false].include? fs['rw']
       fs
     end
