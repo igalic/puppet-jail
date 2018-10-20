@@ -87,7 +87,7 @@ module PuppetX::Zleslie::Helper
     raise("Unexpected Type: '#{arg.class}'. Expecting String.")
   end
 
-  def get_fstabs(fstab)
+  def get_fstabs(fstab, name)
     fstabs = fstab.split("\n").map do |l|
       next if l =~ %r{^\s*$|^\s*#}
       next if l =~ %r{# iocage-auto\s*$}

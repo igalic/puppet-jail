@@ -42,7 +42,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
       pkglist = get_ioc_json_array(s['user.pkglist'])
 
-      fstabs = get_fstabs(s['fstab'])
+      fstabs = get_fstabs(s['fstab'], s['name'])
 
       state = :stopped
       state = :running if s['running'] == 'yes'
