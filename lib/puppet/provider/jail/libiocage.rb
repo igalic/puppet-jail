@@ -33,7 +33,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
     jails = JSON.parse(
       ioc('list', '--output-format=json',
-          '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist'),
+          '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist,fstab'),
     )
     jail_klass = struct_from_hash('JailStruct', jails[0]) unless jails.empty?
     jails.map do |r|
@@ -42,7 +42,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
       pkglist = get_ioc_json_array(s['user.pkglist'])
 
-      fstabs = get_fstabs(s['name'])
+      fstabs = get_fstabs(s['fstab'])
 
       state = :stopped
       state = :running if s['running'] == 'yes'
