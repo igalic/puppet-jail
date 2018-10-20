@@ -92,7 +92,7 @@ Puppet::Type.newtype(:jail) do
     # i thought we want to care about order here, but ioc doesn't ¯\(°_o)/¯
     def insync?(is)
       is = [] if !is || is == :absent
-      is.flatten.sort == should.flatten.sort
+      (is.flatten.sort - should.flatten.sort) == []
     end
   end
 
