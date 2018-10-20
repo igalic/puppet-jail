@@ -1,3 +1,4 @@
+# coding: utf-8
 # This type is meant to facilitate the deployment of FreeBSD jails.
 #
 
@@ -88,6 +89,11 @@ Puppet::Type.newtype(:jail) do
           { src => '/data/containers/webdanger/bar', dst => '/srv/www/danger' },
         ]
       EOM
+    # i thought we want to care about order here, but ioc doesn't ¯\(°_o)/¯
+    def insync?(is)
+      is = [] if !is || is == :absent
+      is.flatten.sort == should.flatten.sort
+    end
   end
 
   newproperty(:pkglist, array_matching: :all) do
