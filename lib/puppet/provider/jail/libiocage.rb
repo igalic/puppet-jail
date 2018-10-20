@@ -154,7 +154,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
   end
 
   def ip6_addr=(value)
-    @property_flush[:ip4_addr] = value
+    @property_flush[:ip6_addr] = value
   end
 
   def boot=(value)
