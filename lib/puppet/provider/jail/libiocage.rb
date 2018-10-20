@@ -173,8 +173,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     @property_flush[:template] = value
   end
 
-  def fstab=(value)
-    @property_flush[:fstab] = value
+  def fstabs=(value)
+    @property_flush[:fstabs] = value
   end
 
   def props=(value)
