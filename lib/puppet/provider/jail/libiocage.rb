@@ -225,6 +225,9 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       props_arr << "ip6_addr='#{@property_flush[:ip6_addr]}'"
     end
 
+    ioc('stop', '-f', resource[:name]) if ((@property_flush[:ip6_addr] ||
+      @property_flush[:ip4_addr]) && resource[:state] == :running)
+
     if @property_flush[:pkglist]
       remove_pkgs, install_pkgs = array_diff(pkglist, @property_flush[:pkglist])
 
