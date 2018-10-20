@@ -244,14 +244,14 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       remove_fstabs, add_fstabs = array_diff(fstabs, @property_flush[:fstabs])
 
       remove_fstabs.each do |f|
-        rw = '-rw' if ['true', :true, true].include? f[:rw]
-        ioc('fstab', 'rm', rw, f[:src], resource[:name])
+        rw = '-rw' if ['true', :true, true].include? f["rw"]
+        ioc('fstab', 'rm', rw, f["src"], resource[:name])
       end
 
       add_fstabs.each do |f|
         rw = nil
-        rw = '-rw' if ['true', :true, true].include? f[:rw]
-        ioc('fstab', 'add', rw, f[:src], f[:dst], resource[:name])
+        rw = '-rw' if ['true', :true, true].include? f["rw"]
+        ioc('fstab', 'add', rw, f["src"], f["dst"], resource[:name])
       end
     end
 
