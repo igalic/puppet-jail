@@ -226,7 +226,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     if @property_flush[:pkglist]
-      remove_pkgs, install_pkgs = array_diff(resource[:pkglist], @property_flush[:pkglist])
+      remove_pkgs, install_pkgs = array_diff(pkglist, @property_flush[:pkglist])
 
       ioc('pkg', '--remove', resource[:name], remove_pkgs.join(' ')) unless remove_pkgs.empty?
       ioc('pkg', resource[:name], install_pkgs.join(' ')) unless install_pkgs.empty?
@@ -241,7 +241,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     end
 
     if @property_flush[:fstabs]
-      remove_fstabs, add_fstabs = array_diff(resource[:fstabs], @property_flush[:fstabs])
+      remove_fstabs, add_fstabs = array_diff(fstabs, @property_flush[:fstabs])
 
       remove_fstabs.each do |f|
         rw = '-rw' if ['true', :true, true].include? f[:rw]
