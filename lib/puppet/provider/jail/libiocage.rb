@@ -134,7 +134,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     if !resource[:fstabs].nil? && resource[:fstabs] != :absent
       resource[:fstabs].each do |f|
         rw = nil
-        rw = '-rw' if ['true', :true, true].include? f['rw']
+        rw = '-o rw' if ['true', :true, true].include? f['rw']
         ioc('fstab', 'add', rw, f['src'], f['dst'], resource['name'])
       end
     end
@@ -252,7 +252,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
       add_fstabs.each do |f|
         rw = nil
-        rw = '-rw' if ['true', :true, true].include? f["rw"]
+        rw = '-o rw' if ['true', :true, true].include? f["rw"]
         ioc('fstab', 'add', rw, f["src"], f["dst"], resource[:name])
       end
     end
