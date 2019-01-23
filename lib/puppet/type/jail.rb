@@ -102,7 +102,7 @@ Puppet::Type.newtype(:jail) do
     attr_reader :should
 
     munge do |x|
-      x = x.split(',') if x.is_a?(String)
+      x = x.split(',') if x.is_a?(String) && x.include?(',')
       x = x.flatten() if is_a?(Array)
       x
     end
