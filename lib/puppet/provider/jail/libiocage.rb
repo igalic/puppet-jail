@@ -33,7 +33,7 @@ Puppet::Type.type(:jail).provide(:libiocage) do
 
     jails = JSON.parse(
       ioc('list', '--output-format=json',
-          '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist,fstab'),
+          '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist,fstab,provision.source,provision.method'),
     )
     jail_klass = struct_from_hash('JailStruct', jails[0]) unless jails.empty?
     jails.map do |r|
@@ -104,9 +104,11 @@ Puppet::Type.type(:jail).provide(:libiocage) do
       props_arr << "depends='#{resource[:depends]}'"
     end
 
+    provision = false
     if !resource[:props].nil? && resource[:props] != :absent
       resource[:props].each do |p, v|
         props_arr << "#{p}='#{v}'"
+        provsion = true if p == 'provsion.source' && ![nil, :absent, '-', 'None', 'none'].include?(v)
       end
     end
 
@@ -138,6 +140,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
         ioc('fstab', 'add', rw, f['src'], f['dst'], resource['name'])
       end
     end
+
+    ioc('provision', resource[:name]) if provision
 
     ioc('start', resource[:name]) if resource[:state] == :running
 
