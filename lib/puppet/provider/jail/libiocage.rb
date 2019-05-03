@@ -32,7 +32,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     default_props, default_rlimits = get_all_props('defaults')
 
     jails = JSON.parse(
-      ioc('list', '--log-level=critical', # ignore anything that's not an error
+      ioc('--log-level=critical', # ignore anything that's not an error
+          'list',
           '--output-format=json',
           '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist,fstab,provision.source,provision.method'),
     )
