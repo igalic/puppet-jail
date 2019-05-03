@@ -32,7 +32,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     default_props, default_rlimits = get_all_props('defaults')
 
     jails = JSON.parse(
-      ioc('list', '--output-format=json',
+      ioc('list', '--log-level=critical', # ignore anything that's not an error
+          '--output-format=json',
           '--output=name,boot,running,release,ip4_addr,ip6_addr,rlimits,depends,user.template,user.pkglist,fstab,provision.source,provision.method'),
     )
     jail_klass = struct_from_hash('JailStruct', jails[0]) unless jails.empty?
