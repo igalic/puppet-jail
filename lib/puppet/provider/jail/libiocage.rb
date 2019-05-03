@@ -266,7 +266,8 @@ Puppet::Type.type(:jail).provide(:libiocage) do
     if @property_flush[:props]
       remove_props, _add_props = array_diff(props.keys, @property_flush[:props].keys)
       ioc('set', props_arr.join(' '), resource[:name]) unless props_arr.empty?
-      ioc('unset', remove_props.join(' '), resource[:name]) unless remove_props.empty?
+      # unset:
+      ioc('set', remove_props.join(' '), resource[:name]) unless remove_props.empty?
     end
 
     if @property_flush[:state]
