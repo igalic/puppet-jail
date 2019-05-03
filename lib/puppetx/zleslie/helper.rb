@@ -92,6 +92,7 @@ module PuppetX::Zleslie::Helper
       next if l =~ %r{^\s*$|^\s*#}
       next if l =~ %r{# iocage-auto\s*$}
       next if l =~ %r{root/.iocage-pkg}
+      next if l =~ %r{root/.ioc-pkg}
 
       src, dst, type, opts, _dump, _pass, trash = l.split(%r{\s+})
       raise ArgumentError, "this fstab line cannot be parsed.. in ruby: `#{l}`" unless trash.nil?
